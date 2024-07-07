@@ -1,0 +1,49 @@
+-- Services
+local StarterGui = game:GetService("StarterGui")
+
+-- Create a ScreenGui for the button
+local gui = Instance.new("ScreenGui")
+gui.Name = "ConsoleButtonGui"
+gui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+gui.ResetOnSpawn = false
+
+-- Create the button
+local button = Instance.new("TextButton")
+button.Name = "OpenConsoleButton"
+button.Parent = gui
+button.AnchorPoint = Vector2.new(1, 0)
+button.Position = UDim2.new(1, -1100, 0, -30)  -- Upper right corner positioning
+button.Size = UDim2.new(0, 30, 0, 30)
+button.Font = Enum.Font.SourceSansBold
+button.TextSize = 18
+button.TextColor3 = Color3.fromRGB(255, 255, 255)
+button.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+button.BackgroundTransparency = 0.5  -- Semi-transparent background
+button.TextStrokeTransparency = 1
+button.Text = "🐰"
+
+-- Add UICorner to make the button corners smooth
+local buttonCorner = Instance.new("UICorner")
+buttonCorner.CornerRadius = UDim.new(0, 5)  -- Adjust the corner radius to 5
+buttonCorner.Parent = button
+
+-- Function to open the console when the button is clicked
+button.MouseButton1Click:Connect(function()
+    StarterGui:SetCore("DevConsoleVisible", true)
+end)
+
+local StarterGui = game:GetService("StarterGui")
+local Players = game:GetService("Players")
+
+-- Function to fetch the player's headshot image
+local function getPlayerHeadshotImage(playerName)
+    local player = Players:FindFirstChild(playerName)
+    if player then
+        local userId = player.UserId
+        local ThumbType = Enum.ThumbnailType.HeadShot
+        local ThumbSize = Enum.ThumbnailSize.Size420x420  -- Larger size for clarity
+
+        return Players:GetUserThumbnailAsync(userId, ThumbType, ThumbSize)
+    end
+    return nil
+end
