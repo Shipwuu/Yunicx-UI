@@ -1,17 +1,29 @@
-local function executeScript(url)
+local urls = {
+    "https://raw.githubusercontent.com/Shipwuu/Yunicx-UI/main/Button%201",
+    "https://raw.githubusercontent.com/Shipwuu/Yunicx-UI/main/Button%204",
+    "https://raw.githubusercontent.com/Shipwuu/Yunicx-UI/main/Button%203",
+    "https://raw.githubusercontent.com/Shipwuu/Yunicx-UI/main/Button%202"
+}
+
+local scripts = {}
+
+for _, url in ipairs(urls) do
     local success, result = pcall(function()
-        return loadstring(game:HttpGet(url))()
+        return game:HttpGet(url)
     end)
-    if not success then
-        warn("Failed to execute script from URL: " .. url)
+    if success then
+        table.insert(scripts, result)
+    else
+        warn("Failed to fetch script from URL: " .. url)
     end
 end
 
-local urls = {
-    "https://raw.githubusercontent.com/Shipwuu/Yunicx-UI/main/Button%204"
-}
+local concatenatedScript = table.concat(scripts, "\n")
 
-for _, url in ipairs(urls) do
-    executeScript(url)
-    wait(1) -- Wait for 1 second before executing the next script
+local success, errorMessage = pcall(function()
+    loadstring(concatenatedScript)()
+end)
+
+if not success then
+    warn("Failed to execute concatenated script: " .. errorMessage)
 end
