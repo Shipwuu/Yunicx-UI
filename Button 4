@@ -1,0 +1,415 @@
+-- Services
+local StarterGui = game:GetService("StarterGui")
+
+-- Create a ScreenGui for the button
+local gui = Instance.new("ScreenGui")
+gui.Name = "ConsoleButtonGui"
+gui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+gui.ResetOnSpawn = false
+
+-- Create the button
+local button = Instance.new("TextButton")
+button.Name = "OpenConsoleButton"
+button.Parent = gui
+button.AnchorPoint = Vector2.new(1, 0)
+button.Position = UDim2.new(1, -980, 0, -30)  -- Upper right corner positioning
+button.Size = UDim2.new(0, 30, 0, 30)
+button.Font = Enum.Font.SourceSansBold
+button.TextSize = 18
+button.TextColor3 = Color3.fromRGB(255, 255, 255)
+button.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+button.BackgroundTransparency = 0.5  -- Semi-transparent background
+button.TextStrokeTransparency = 1
+button.Text = "👑"
+
+-- Add UICorner to make the button corners smooth
+local buttonCorner = Instance.new("UICorner")
+buttonCorner.CornerRadius = UDim.new(0, 5)  -- Adjust the corner radius to 5
+buttonCorner.Parent = button
+
+-- Function to open the console when the button is clicked
+button.MouseButton1Click:Connect(function()
+    
+    local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+
+-- Function to reset the camera to the local player
+local function resetCameraToLocalPlayer()
+    if LocalPlayer.Character then
+        local humanoid = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            Camera.CameraSubject = humanoid
+        end
+    end
+end
+
+-- Create a ScreenGui for spectate functionality
+local spectateGui = Instance.new("ScreenGui")
+spectateGui.Name = "SpectateGui"
+spectateGui.ResetOnSpawn = true -- Keep the GUI persistent across respawns
+spectateGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+-- Create a Frame to hold the spectate buttons and search functionality
+local frame = Instance.new("Frame")
+frame.Name = "ButtonFrame"
+frame.Size = UDim2.new(0.2, 0, 0.15, 0) -- Adjusted size to be smaller
+frame.Position = UDim2.new(0.4, 0, 0.8, 0) -- Adjusted position
+frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+frame.BackgroundTransparency = 0.3
+frame.Parent = spectateGui
+
+-- Add UICorner to the Frame
+local frameCorner = Instance.new("UICorner")
+frameCorner.CornerRadius = UDim.new(0.1, 0)
+frameCorner.Parent = frame
+
+-- Add a white outline to the frame
+local frameOutline = Instance.new("UIStroke")
+frameOutline.Color = Color3.fromRGB(255, 255, 255)
+frameOutline.Thickness = 2
+frameOutline.Transparency = 0.5
+frameOutline.Parent = frame
+
+-- Make the frame draggable
+local UserInputService = game:GetService("UserInputService")
+
+local dragging
+local dragInput
+local dragStart
+local startPos
+
+local function update(input)
+    local delta = input.Position - dragStart
+    frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+end
+
+frame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = frame.Position
+
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+frame.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        dragInput = input
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        update(input)
+    end
+end)
+
+-- Create a TextLabel to display the player's name
+local playerNameLabel = Instance.new("TextLabel")
+playerNameLabel.Name = "PlayerNameLabel"
+playerNameLabel.Size = UDim2.new(1, 0, 0.25, 0)
+playerNameLabel.Position = UDim2.new(0, 0, -0.3, 0) -- Add a bit more spacing
+playerNameLabel.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+playerNameLabel.BackgroundTransparency = 0.3
+playerNameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+playerNameLabel.TextScaled = true
+playerNameLabel.Font = Enum.Font.GothamBold
+playerNameLabel.Text = ""
+playerNameLabel.Parent = frame
+
+-- Add UICorner to the PlayerNameLabel to make it elongated
+local playerNameLabelCorner = Instance.new("UICorner")
+playerNameLabelCorner.CornerRadius = UDim.new(1, 0)
+playerNameLabelCorner.Parent = playerNameLabel
+
+-- Create a TextBox for name searching
+local searchBox = Instance.new("TextBox")
+searchBox.Name = "SearchBox"
+searchBox.Size = UDim2.new(0.7, 0, 0.2, 0) -- Shortened size to avoid hitting the camera reset button
+searchBox.Position = UDim2.new(0.1, 0, 0.6, 0)
+searchBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+searchBox.BackgroundTransparency = 0.3
+searchBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+searchBox.TextScaled = true
+searchBox.Font = Enum.Font.GothamBold
+searchBox.PlaceholderText = "Enter player name"
+searchBox.Parent = frame
+
+-- Add UICorner to the searchBox
+local searchBoxCorner = Instance.new("UICorner")
+searchBoxCorner.CornerRadius = UDim.new(0.1, 0)
+searchBoxCorner.Parent = searchBox
+
+-- Function to create a button with specified text and position
+local function createButton(name, text, position, size, textColor)
+    local button = Instance.new("TextButton")
+    button.Name = name
+    button.Size = size or UDim2.new(0.2, 0, 0.4, 0) -- Adjusted size
+    button.Position = position
+    button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    button.BackgroundTransparency = 0.3
+    button.Text = text
+    button.TextColor3 = textColor or Color3.fromRGB(255, 255, 255)
+    button.TextScaled = true
+    button.Font = Enum.Font.GothamBold
+    button.Parent = frame
+
+    -- Add UICorner to the button
+    local buttonCorner = Instance.new("UICorner")
+    buttonCorner.CornerRadius = UDim.new(0.1, 0)
+    buttonCorner.Parent = button
+
+    return button
+end
+
+-- Create spectate buttons
+local previousButton = createButton("PreviousButton", "<", UDim2.new(0.05, 0, 0.1, 0))
+local destroyButton = createButton("DestroyButton", "X", UDim2.new(0.4, 0, 0.1, 0))
+local nextButton = createButton("NextButton", ">", UDim2.new(0.75, 0, 0.1, 0))
+
+-- Function to update the spectate label
+local function updateSpectateLabel(player)
+    if player then
+        playerNameLabel.Text = player.DisplayName .. " (" .. player.Name .. ")"
+    else
+        playerNameLabel.Text = ""
+    end
+end
+
+-- Function to find player by name
+local function findPlayerByName(name)
+    for _, player in ipairs(game.Players:GetPlayers()) do
+        if player.Name:lower():find(name:lower(), 1, true) or player.DisplayName:lower():find(name:lower(), 1, true) then
+            return player
+        end
+    end
+    return nil
+end
+
+-- Store the original camera subject
+local originalCameraSubject = workspace.CurrentCamera.CameraSubject
+
+-- Function to reset camera to original subject
+local function resetCamera()
+    workspace.CurrentCamera.CameraSubject = originalCameraSubject
+    updateSpectateLabel(game.Players.LocalPlayer) -- Update the label to show the local player
+end
+
+-- Spectate functionality
+local players = game.Players:GetPlayers()
+local currentSpectateIndex = 1
+
+local function spectate(player)
+    local character = player.Character
+    if character then
+        workspace.CurrentCamera.CameraSubject = character:FindFirstChildWhichIsA("Humanoid")
+    end
+    updateSpectateLabel(player)
+end
+
+previousButton.MouseButton1Click:Connect(function()
+    currentSpectateIndex = currentSpectateIndex - 1
+    if currentSpectateIndex < 1 then
+        currentSpectateIndex = #players
+    end
+    spectate(players[currentSpectateIndex])
+end)
+
+nextButton.MouseButton1Click:Connect(function()
+    currentSpectateIndex = currentSpectateIndex + 1
+    if currentSpectateIndex > #players then
+        currentSpectateIndex = 1
+    end
+    spectate(players[currentSpectateIndex])
+end)
+
+destroyButton.MouseButton1Click:Connect(function()
+    resetCamera()
+    spectateGui:Destroy()
+end)
+
+searchBox.FocusLost:Connect(function(enterPressed)
+    if enterPressed then
+        local playerName = searchBox.Text
+        local player = findPlayerByName(playerName)
+        if player then
+            spectate(player)
+        else
+            playerNameLabel.Text = "Player not found"
+        end
+    end
+end)
+
+-- Track player leaving and updating spectate label accordingly
+game.Players.PlayerRemoving:Connect(function(player)
+    if player == players[currentSpectateIndex] then
+        currentSpectateIndex = currentSpectateIndex - 1
+        if currentSpectateIndex < 1 then
+            currentSpectateIndex = #players
+        end
+        spectate(players[currentSpectateIndex])
+    end
+    players = game.Players:GetPlayers()  -- Update players list
+end)
+
+-- Ensure players list is updated when new players join
+game.Players.PlayerAdded:Connect(function()
+    players = game.Players:GetPlayers()
+end)
+
+-- Initial spectate
+spectate(players[currentSpectateIndex])
+
+-- Create toggle button for spectate UI
+local toggleButton = Instance.new("TextButton")
+toggleButton.Size = UDim2.new(0.1, 0, 0.05, 0) -- Small button size
+toggleButton.Position = UDim2.new(0.65, 0, 0.92, 0) -- Positioned to the left of the reset button
+toggleButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+toggleButton.BackgroundTransparency = 0.3
+toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+toggleButton.Text = "Close"
+toggleButton.TextSize = 14
+toggleButton.TextScaled = true
+toggleButton.Font = Enum.Font.GothamBold
+toggleButton.Parent = spectateGui
+
+-- Add UICorner to the toggle button
+local toggleButtonCorner = Instance.new("UICorner")
+toggleButtonCorner.CornerRadius = UDim.new(0.5, 0) -- Fully round corners
+toggleButtonCorner.Parent = toggleButton
+
+-- Toggle functionality
+local spectateGuiVisible = true
+toggleButton.MouseButton1Click:Connect(function()
+    spectateGuiVisible = not spectateGuiVisible
+    frame.Visible = spectateGuiVisible
+    if spectateGuiVisible then
+        toggleButton.Text = "Close"
+    else
+        toggleButton.Text = "Open"
+    end
+end)
+
+-- Ensure toggle button resets at respawn and disappears on death
+LocalPlayer.CharacterAdded:Connect(function()
+    spectateGuiVisible = true
+    frame.Visible = spectateGuiVisible
+end)
+
+LocalPlayer.CharacterRemoving:Connect(function()
+    toggleButton:Destroy()
+    spectateGui:Destroy()
+end)
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+
+-- Dummy implementations for StopFreecam and execCmd if not defined
+if not StopFreecam then
+    function StopFreecam()
+        -- Add your actual StopFreecam implementation here
+        print("StopFreecam called")
+    end
+end
+
+if not execCmd then
+    function execCmd(command)
+        -- Add your actual execCmd implementation here
+        print("execCmd called with command:", command)
+    end
+end
+
+-- Function to reset the camera to the local player
+local function fixcam(speaker)
+    if not speaker or not speaker.Character then
+        print("Speaker or speaker's character is nil")
+        return
+    end
+
+    -- Function to stop free camera mode
+    StopFreecam()
+
+    -- Execute command to unview
+    execCmd('unview')
+
+    -- Destroy the current camera
+    if workspace.CurrentCamera then
+        workspace.CurrentCamera:Destroy()
+    end
+
+    -- Wait a short moment to ensure previous commands are processed
+    wait(0.1)
+
+    -- Wait until the character is fully loaded with a humanoid
+    repeat wait() until speaker.Character and speaker.Character:FindFirstChildWhichIsA('Humanoid')
+
+    local humanoid = speaker.Character:FindFirstChildWhichIsA('Humanoid')
+    if not humanoid then
+        print("Humanoid not found in character")
+        return
+    end
+
+    -- Create a new camera instance and set it up
+    local newCamera = Instance.new('Camera')
+    newCamera.Parent = workspace
+    workspace.CurrentCamera = newCamera
+
+    -- Set the camera subject to the player's humanoid
+    newCamera.CameraSubject = humanoid
+    newCamera.CameraType = Enum.CameraType.Custom
+
+    -- Set the player's camera properties
+    speaker.CameraMinZoomDistance = 0.5
+    speaker.CameraMaxZoomDistance = 400
+    speaker.CameraMode = Enum.CameraMode.Classic
+
+    -- Ensure the head is not anchored
+    local head = speaker.Character:FindFirstChild('Head')
+    if head then
+        head.Anchored = false
+    else
+        print("Head not found in character")
+    end
+end
+
+-- UI elements to control the camera reset
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "ResetCameraGui"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+screenGui.Enabled = true
+screenGui.IgnoreGuiInset = true
+screenGui.DisplayOrder = 0
+screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+local resetButton = Instance.new("TextButton")
+resetButton.Size = UDim2.new(0.08, 0, 0.05, 0) -- Smaller button size, slightly longer
+resetButton.Position = UDim2.new(0.76, 0, 0.925, 0) -- Slightly lower and to the left
+resetButton.Text = "Fix Cam"
+resetButton.TextSize = 14 -- Smaller text size
+resetButton.TextColor3 = Color3.fromRGB(255, 255, 255)  -- White text color
+resetButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)  -- Black background
+resetButton.BackgroundTransparency = 0.3  -- Semi-transparent background (adjust transparency as needed)
+resetButton.Font = Enum.Font.GothamBold
+resetButton.Parent = screenGui
+
+local screenGuiCorner = Instance.new("UICorner")
+screenGuiCorner.CornerRadius = UDim.new(0.5, 0)  -- Adjust the corner radius
+screenGuiCorner.Parent = resetButton
+
+resetButton.MouseButton1Click:Connect(function()
+    fixcam(LocalPlayer)
+end)
+
+-- Optional: Automatically reset the camera when the local player respawns
+LocalPlayer.CharacterAdded:Connect(function()
+    wait(0.1) -- Small delay to ensure character is fully loaded
+    fixcam(LocalPlayer)
+end)
