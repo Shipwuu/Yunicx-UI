@@ -1,10 +1,11 @@
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local COREGUI = game:GetService("CoreGui")
+local CoreGui = game:GetService("CoreGui")
 local LocalPlayer = Players.LocalPlayer
 
 -- Variables
 local ESPenabled = false
+local espTransparency = 0.7  -- Adjust transparency as needed
 local friends = {}
 
 -- Fetch friends list
@@ -42,16 +43,16 @@ end
 
 function ESP(plr)
     task.spawn(function()
-        for i, v in pairs(COREGUI:GetChildren()) do
+        for i, v in pairs(CoreGui:GetChildren()) do
             if v.Name == plr.Name .. '_ESP' then
                 v:Destroy()
             end
         end
         wait()
-        if plr.Character and plr.Name ~= Players.LocalPlayer.Name and not COREGUI:FindFirstChild(plr.Name .. '_ESP') then
+        if plr.Character and plr.Name ~= Players.LocalPlayer.Name and not CoreGui:FindFirstChild(plr.Name .. '_ESP') then
             local ESPholder = Instance.new("Folder")
             ESPholder.Name = plr.Name .. '_ESP'
-            ESPholder.Parent = COREGUI
+            ESPholder.Parent = CoreGui
             repeat wait(1) until plr.Character and getRoot(plr.Character) and plr.Character:FindFirstChildOfClass("Humanoid")
             if plr.Character and plr.Character:FindFirstChild('Head') then
                 local BillboardGui = Instance.new("BillboardGui")
@@ -116,7 +117,7 @@ function ESP(plr)
                     end
                 end)
                 local function espLoop()
-                    if COREGUI:FindFirstChild(plr.Name .. '_ESP') then
+                    if CoreGui:FindFirstChild(plr.Name .. '_ESP') then
                         if plr.Character and getRoot(plr.Character) and plr.Character:FindFirstChildOfClass("Humanoid") and Players.LocalPlayer.Character and getRoot(Players.LocalPlayer.Character) and Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
                             local pos = math.floor((getRoot(Players.LocalPlayer.Character).Position - getRoot(plr.Character).Position).magnitude)
                             TextLabel2.Text = pos .. " studs"  -- Show only the studs distance
@@ -144,7 +145,7 @@ local function toggleESP()
             end
         end
     else
-        for i, v in pairs(COREGUI:GetChildren()) do
+        for i, v in pairs(CoreGui:GetChildren()) do
             if v.Name:find('_ESP') then
                 v:Destroy()
             end
@@ -152,32 +153,7 @@ local function toggleESP()
     end
 end
 
--- Create the button for ESP toggle
-local espButton = Instance.new("TextButton")
-espButton.Name = "ESPButton"
-espButton.Parent = PlayerGui.CustomButtonsGui  -- Assuming CustomButtonsGui is already created
-espButton.AnchorPoint = Vector2.new(1, 0)
-espButton.Position = UDim2.new(1, -1020, 0, -30)  -- Adjust X position as needed
-espButton.Size = UDim2.new(0, 30, 0, 30)
-espButton.Font = Enum.Font.SourceSansBold
-espButton.TextSize = 18
-espButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-espButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-espButton.BackgroundTransparency = 0.5  -- Semi-transparent background
-espButton.TextStrokeTransparency = 1
-espButton.Text = "🐣"
-
--- Add UICorner to make the button corners smooth
-local espButtonCorner = Instance.new("UICorner")
-espButtonCorner.CornerRadius = UDim.new(0, 5)  -- Adjust the corner radius as needed
-espButtonCorner.Parent = espButton
-
--- Function to handle ESP toggle when the button is clicked
-espButton.MouseButton1Click:Connect(function()
-    toggleESP()
-end)
-
--- UI elements to control the ESP toggle (optional)
+-- UI elements to control the ESP toggle
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "ESPToggleGui"
 screenGui.ResetOnSpawn = false
@@ -210,7 +186,7 @@ end)
 RunService.RenderStepped:Connect(function()
     if ESPenabled then
         for _, plr in pairs(Players:GetPlayers()) do
-            if not COREGUI:FindFirstChild(plr.Name .. '_ESP') and plr ~= LocalPlayer then
+            if not CoreGui:FindFirstChild(plr.Name .. '_ESP') and plr ~= LocalPlayer then
                 ESP(plr)
             end
         end
@@ -226,7 +202,7 @@ end)
 
 -- Remove ESP when a player leaves the game
 Players.PlayerRemoving:Connect(function(plr)
-    for i, v in pairs(COREGUI:GetChildren()) do
+    for i, v in pairs(CoreGui:GetChildren()) do
         if v.Name == plr.Name .. '_ESP' then
             v:Destroy()
         end
