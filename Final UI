@@ -8,10 +8,7 @@ local function executeScript(url)
 end
 
 local urls = {
-    "https://raw.githubusercontent.com/Shipwuu/Yunicx-UI/main/Button%204",
-    "https://raw.githubusercontent.com/Shipwuu/Yunicx-UI/main/Button%201",
-    "https://raw.githubusercontent.com/Shipwuu/Yunicx-UI/main/Button%203",
-    "https://raw.githubusercontent.com/Shipwuu/Yunicx-UI/main/Button%202"
+    "https://raw.githubusercontent.com/Shipwuu/Yunicx-UI/main/Button%204"
 }
 
 for _, url in ipairs(urls) do
