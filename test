@@ -1,0 +1,234 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local COREGUI = game:GetService("CoreGui")
+local LocalPlayer = Players.LocalPlayer
+
+-- Variables
+local ESPenabled = false
+local friends = {}
+
+-- Fetch friends list
+local function updateFriendsList()
+    friends = {}
+    local success, result = pcall(function()
+        return Players:GetFriendsAsync(LocalPlayer.UserId)
+    end)
+    if success then
+        for _, friend in pairs(result:GetCurrentPage()) do
+            friends[friend.Username] = true
+        end
+        print("Friends list updated:", friends)
+    else
+        warn("Failed to fetch friends list:", result)
+    end
+end
+
+-- Initial fetch of the friends list
+updateFriendsList()
+
+-- Utility Functions
+function round(num, numDecimalPlaces)
+    local mult = 10^(numDecimalPlaces or 0)
+    return math.floor(num * mult + 0.5) / mult
+end
+
+function getRoot(char)
+    return char:FindFirstChild("HumanoidRootPart") or char:FindFirstChild("Torso") or char:FindFirstChild("UpperTorso")
+end
+
+function isFriend(plr)
+    return friends[plr.Name] or false
+end
+
+function ESP(plr)
+    task.spawn(function()
+        for i, v in pairs(COREGUI:GetChildren()) do
+            if v.Name == plr.Name .. '_ESP' then
+                v:Destroy()
+            end
+        end
+        wait()
+        if plr.Character and plr.Name ~= Players.LocalPlayer.Name and not COREGUI:FindFirstChild(plr.Name .. '_ESP') then
+            local ESPholder = Instance.new("Folder")
+            ESPholder.Name = plr.Name .. '_ESP'
+            ESPholder.Parent = COREGUI
+            repeat wait(1) until plr.Character and getRoot(plr.Character) and plr.Character:FindFirstChildOfClass("Humanoid")
+            if plr.Character and plr.Character:FindFirstChild('Head') then
+                local BillboardGui = Instance.new("BillboardGui")
+                BillboardGui.Adornee = plr.Character.Head
+                BillboardGui.Name = plr.Name
+                BillboardGui.Parent = ESPholder
+                BillboardGui.Size = UDim2.new(0, 150, 0, 50)
+                BillboardGui.StudsOffset = Vector3.new(0, 1.5, 0)
+                BillboardGui.AlwaysOnTop = true
+
+                local TextLabel1 = Instance.new("TextLabel")
+                TextLabel1.Parent = BillboardGui
+                TextLabel1.BackgroundTransparency = 1
+                TextLabel1.Position = UDim2.new(0, 0, 0, 0)
+                TextLabel1.Size = UDim2.new(0, 150, 0, 25)
+                TextLabel1.Font = Enum.Font.GothamBold
+                TextLabel1.TextSize = 18
+                TextLabel1.TextColor3 = isFriend(plr) and Color3.fromRGB(0, 162, 255) or Color3.new(1, 1, 1)  -- Blue for friends, white for others
+                TextLabel1.TextStrokeTransparency = 0.5
+                TextLabel1.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)  -- Black outline
+                TextLabel1.TextYAlignment = Enum.TextYAlignment.Top
+                TextLabel1.Text = plr.DisplayName .. " (" .. plr.Name .. ")"
+
+                local TextLabel2 = Instance.new("TextLabel")
+                TextLabel2.Parent = BillboardGui
+                TextLabel2.BackgroundTransparency = 1
+                TextLabel2.Position = UDim2.new(0, 0, 0, 20)  -- Close the distance between the name and studs
+                TextLabel2.Size = UDim2.new(0, 150, 0, 25)
+                TextLabel2.Font = Enum.Font.GothamBold
+                TextLabel2.TextSize = 16
+                TextLabel2.TextColor3 = Color3.new(1, 1, 1)
+                TextLabel2.TextStrokeTransparency = 0.5
+                TextLabel2.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)  -- Black outline
+                TextLabel2.TextYAlignment = Enum.TextYAlignment.Top
+
+                local espLoopFunc
+                local teamChange
+                local addedFunc
+                addedFunc = plr.CharacterAdded:Connect(function()
+                    if ESPenabled then
+                        espLoopFunc:Disconnect()
+                        teamChange:Disconnect()
+                        ESPholder:Destroy()
+                        repeat wait(1) until getRoot(plr.Character) and plr.Character:FindFirstChildOfClass("Humanoid")
+                        ESP(plr)
+                        addedFunc:Disconnect()
+                    else
+                        teamChange:Disconnect()
+                        addedFunc:Disconnect()
+                    end
+                end)
+                teamChange = plr:GetPropertyChangedSignal("TeamColor"):Connect(function()
+                    if ESPenabled then
+                        espLoopFunc:Disconnect()
+                        addedFunc:Disconnect()
+                        ESPholder:Destroy()
+                        repeat wait(1) until getRoot(plr.Character) and plr.Character:FindFirstChildOfClass("Humanoid")
+                        ESP(plr)
+                        teamChange:Disconnect()
+                    else
+                        teamChange:Disconnect()
+                    end
+                end)
+                local function espLoop()
+                    if COREGUI:FindFirstChild(plr.Name .. '_ESP') then
+                        if plr.Character and getRoot(plr.Character) and plr.Character:FindFirstChildOfClass("Humanoid") and Players.LocalPlayer.Character and getRoot(Players.LocalPlayer.Character) and Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
+                            local pos = math.floor((getRoot(Players.LocalPlayer.Character).Position - getRoot(plr.Character).Position).magnitude)
+                            TextLabel2.Text = pos .. " studs"  -- Show only the studs distance
+                        end
+                    else
+                        teamChange:Disconnect()
+                        addedFunc:Disconnect()
+                        espLoopFunc:Disconnect()
+                    end
+                end
+                espLoopFunc = RunService.RenderStepped:Connect(espLoop)
+            end
+        end
+    end)
+end
+
+-- Function to toggle ESP visibility
+local function toggleESP()
+    ESPenabled = not ESPenabled
+    if ESPenabled then
+        updateFriendsList()
+        for _, plr in pairs(Players:GetPlayers()) do
+            if plr ~= LocalPlayer then
+                ESP(plr)
+            end
+        end
+    else
+        for i, v in pairs(COREGUI:GetChildren()) do
+            if v.Name:find('_ESP') then
+                v:Destroy()
+            end
+        end
+    end
+end
+
+-- Create the button for ESP toggle
+local espButton = Instance.new("TextButton")
+espButton.Name = "ESPButton"
+espButton.Parent = PlayerGui.CustomButtonsGui  -- Assuming CustomButtonsGui is already created
+espButton.AnchorPoint = Vector2.new(1, 0)
+espButton.Position = UDim2.new(1, -1020, 0, -30)  -- Adjust X position as needed
+espButton.Size = UDim2.new(0, 30, 0, 30)
+espButton.Font = Enum.Font.SourceSansBold
+espButton.TextSize = 18
+espButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+espButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+espButton.BackgroundTransparency = 0.5  -- Semi-transparent background
+espButton.TextStrokeTransparency = 1
+espButton.Text = "🐣"
+
+-- Add UICorner to make the button corners smooth
+local espButtonCorner = Instance.new("UICorner")
+espButtonCorner.CornerRadius = UDim.new(0, 5)  -- Adjust the corner radius as needed
+espButtonCorner.Parent = espButton
+
+-- Function to handle ESP toggle when the button is clicked
+espButton.MouseButton1Click:Connect(function()
+    toggleESP()
+end)
+
+-- UI elements to control the ESP toggle (optional)
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "ESPToggleGui"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+screenGui.Enabled = true
+screenGui.IgnoreGuiInset = true
+screenGui.DisplayOrder = 0
+screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+local toggleButton = Instance.new("TextButton")
+toggleButton.Size = UDim2.new(0.08, 0, 0.05, 0) -- Adjust button size
+toggleButton.Position = UDim2.new(0.76, 0, 0.925, 0) -- Adjust position
+toggleButton.Text = "Toggle ESP"
+toggleButton.TextSize = 14 -- Adjust text size
+toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)  -- White text color
+toggleButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)  -- Black background
+toggleButton.BackgroundTransparency = 0.3  -- Semi-transparent background
+toggleButton.Font = Enum.Font.GothamBold
+toggleButton.Parent = screenGui
+
+local toggleButtonCorner = Instance.new("UICorner")
+toggleButtonCorner.CornerRadius = UDim.new(0.5, 0)  -- Adjust the corner radius
+toggleButtonCorner.Parent = toggleButton
+
+toggleButton.MouseButton1Click:Connect(function()
+    toggleESP()
+end)
+
+-- Continuously check for new players and update ESP
+RunService.RenderStepped:Connect(function()
+    if ESPenabled then
+        for _, plr in pairs(Players:GetPlayers()) do
+            if not COREGUI:FindFirstChild(plr.Name .. '_ESP') and plr ~= LocalPlayer then
+                ESP(plr)
+            end
+        end
+    end
+end)
+
+-- Automatically apply ESP to new players if enabled
+Players.PlayerAdded:Connect(function(plr)
+    if ESPenabled then
+        ESP(plr)
+    end
+end)
+
+-- Remove ESP when a player leaves the game
+Players.PlayerRemoving:Connect(function(plr)
+    for i, v in pairs(COREGUI:GetChildren()) do
+        if v.Name == plr.Name .. '_ESP' then
+            v:Destroy()
+        end
+    end
+end)
