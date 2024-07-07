@@ -1,0 +1,55 @@
+-- Create a ScreenGui for the button
+local gui = Instance.new("ScreenGui")
+gui.Name = "CustomButtonsGui"
+gui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
+gui.ResetOnSpawn = false
+
+-- Create the button for teleportation confirmation
+local rejoinButton = Instance.new("TextButton")
+rejoinButton.Name = "RejoinButton"
+rejoinButton.Parent = gui
+rejoinButton.AnchorPoint = Vector2.new(1, 0)
+rejoinButton.Position = UDim2.new(1, -1060, 0, -30)  -- Adjust X position as needed
+rejoinButton.Size = UDim2.new(0, 30, 0, 30)
+rejoinButton.Font = Enum.Font.SourceSansBold
+rejoinButton.TextSize = 18
+rejoinButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+rejoinButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+rejoinButton.BackgroundTransparency = 0.5  -- Semi-transparent background
+rejoinButton.TextStrokeTransparency = 1
+rejoinButton.Text = "🤍"
+
+-- Add UICorner to make the button corners smooth
+local rejoinButtonCorner = Instance.new("UICorner")
+rejoinButtonCorner.CornerRadius = UDim.new(0, 5)  -- Adjust the corner radius as needed
+rejoinButtonCorner.Parent = rejoinButton
+
+-- Function to teleport when the "Rejoin" button is clicked
+rejoinButton.MouseButton1Click:Connect(function()
+    local bindable = Instance.new("BindableFunction")
+
+    function bindable.OnInvoke(response)
+        local ts = game:GetService("TeleportService")
+        local p = game:GetService("Players").LocalPlayer
+
+        ts:Teleport(game.PlaceId, p)
+        if response == "Yes" then
+            -- Your logic when "Yes" is chosen
+        elseif response == "No" then
+            -- Your logic when "No" is chosen
+        end
+    end
+
+    -- Fetch the current player's headshot image
+    local playerName = Players.LocalPlayer.Name
+    local HeadshotImage = getPlayerHeadshotImage(playerName)
+
+    StarterGui:SetCore("SendNotification", {
+        Title = "  💞 REJOIN",
+        Text = "   Are You Sure?",
+        Duration = 8,
+        Callback = bindable,
+        Button1 = "Yes",
+        Icon = HeadshotImage or ""  -- Set the headshot image as the icon, fallback to empty string if image not found
+    })
+end)
