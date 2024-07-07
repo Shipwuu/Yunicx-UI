@@ -413,3 +413,5 @@ LocalPlayer.CharacterAdded:Connect(function()
     wait(0.1) -- Small delay to ensure character is fully loaded
     fixcam(LocalPlayer)
 end)
+
+end)
