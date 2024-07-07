@@ -85,3 +85,62 @@ for i, p in pairs(ps:GetPlayers()) do
 end
 
 ps.PlayerAdded:Connect(p_added)
+
+-- Create a ScreenGui for the button
+local gui = Instance.new("ScreenGui")
+gui.Name = "CustomButtonsGui"
+gui.Parent = PlayerGui
+gui.ResetOnSpawn = false
+
+-- Create the button for ESP toggle confirmation
+local espButton = Instance.new("TextButton")
+espButton.Name = "ESPButton"
+espButton.Parent = gui
+espButton.AnchorPoint = Vector2.new(1, 0)
+espButton.Position = UDim2.new(1, -1020, 0, -30)  -- Adjust X position as needed
+espButton.Size = UDim2.new(0, 30, 0, 30)
+espButton.Font = Enum.Font.SourceSansBold
+espButton.TextSize = 18
+espButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+espButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+espButton.BackgroundTransparency = 0.5  -- Semi-transparent background
+espButton.TextStrokeTransparency = 1
+espButton.Text = "🐣"
+
+-- Add UICorner to make the button corners smooth
+local espButtonCorner = Instance.new("UICorner")
+espButtonCorner.CornerRadius = UDim.new(0, 5)  -- Adjust the corner radius as needed
+espButtonCorner.Parent = espButton
+
+-- Function to handle ESP toggle when the button is clicked
+espButton.MouseButton1Click:Connect(function()
+    local bindable = Instance.new("BindableFunction")
+
+    function bindable.OnInvoke(response)
+        if response == "Yes" then
+            espEnabled = true
+            -- Apply ESP to all players, including those already in game
+            for i, p in pairs(ps:GetPlayers()) do
+                if p ~= lp and p.Character then
+                    esp(p, p.Character)
+                end
+            end
+        elseif response == "No" then
+            espEnabled = false
+        end
+    end
+
+    -- Fetch the current player's headshot image
+    local playerName = Players.LocalPlayer.Name
+    local HeadshotImage = getPlayerHeadshotImage(playerName)
+
+    StarterGui:SetCore("SendNotification", {
+        Title = " ⚠️ ESP ⚠️",
+        Text = "Are You Sure?",
+        Duration = 8,
+        Callback = bindable,
+        Button1 = "Yes",
+        Button2 = "No",
+        Icon = HeadshotImage or ""  -- Set the headshot image as the icon, fallback to empty string if image not found
+    })
+end)
