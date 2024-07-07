@@ -18,7 +18,7 @@ button.Font = Enum.Font.SourceSansBold
 button.TextSize = 18
 button.TextColor3 = Color3.fromRGB(255, 255, 255)
 button.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-button.BackgroundTransparency = 0.7  -- Semi-transparent background
+button.BackgroundTransparency = 0.5  -- Semi-transparent background
 button.TextStrokeTransparency = 1
 button.Text = "👑"
 
@@ -396,7 +396,7 @@ resetButton.Text = "Fix Cam"
 resetButton.TextSize = 14 -- Smaller text size
 resetButton.TextColor3 = Color3.fromRGB(255, 255, 255)  -- White text color
 resetButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)  -- Black background
-resetButton.BackgroundTransparency = 0.3  -- Semi-transparent background (adjust transparency as needed)
+resetButton.BackgroundTransparency = 0.7  -- Semi-transparent background (adjust transparency as needed)
 resetButton.Font = Enum.Font.GothamBold
 resetButton.Parent = screenGui
 
