@@ -1,3 +1,21 @@
+local StarterGui = game:GetService("StarterGui")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+
+-- Function to fetch the player's headshot image
+local function getPlayerHeadshotImage(playerName)
+    local player = Players:FindFirstChild(playerName)
+    if player then
+        local userId = player.UserId
+        local ThumbType = Enum.ThumbnailType.HeadShot
+        local ThumbSize = Enum.ThumbnailSize.Size420x420
+
+        return Players:GetUserThumbnailAsync(userId, ThumbType, ThumbSize)
+    end
+    return nil
+end
+
 -- ESP Script
 local c = workspace.CurrentCamera
 local ps = game:GetService("Players")
@@ -144,3 +162,4 @@ espButton.MouseButton1Click:Connect(function()
         Icon = HeadshotImage or ""  -- Set the headshot image as the icon, fallback to empty string if image not found
     })
 end)
+
