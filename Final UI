@@ -1,8 +1,20 @@
+local function executeScript(url)
+    local success, result = pcall(function()
+        return loadstring(game:HttpGet(url))()
+    end)
+    if not success then
+        warn("Failed to execute script from URL: " .. url)
+    end
+end
+
 local urls = {
     "https://raw.githubusercontent.com/Shipwuu/Yunicx-UI/main/Button%201",
-    "https://raw.githubusercontent.com/Shipwuu/Yunicx-UI/main/Button%204"
+    "https://raw.githubusercontent.com/Shipwuu/Yunicx-UI/main/Button%204",
+    "https://raw.githubusercontent.com/Shipwuu/Yunicx-UI/main/Button%203",
+    "https://raw.githubusercontent.com/Shipwuu/Yunicx-UI/main/Button%202"
 }
 
 for _, url in ipairs(urls) do
-    loadstring(game:HttpGet(url))()
+    executeScript(url)
+    wait(1) -- Wait for 1 second before executing the next script
 end
