@@ -3,8 +3,8 @@ local urls = {
     "https://raw.githubusercontent.com/Shipwuu/Yunicx-UI/main/Button%204",
     "https://raw.githubusercontent.com/Shipwuu/Yunicx-UI/main/Button%203",
     "https://raw.githubusercontent.com/Shipwuu/Yunicx-UI/main/Button%202",
-    "https://raw.githubusercontent.com/Shipwuu/Yunicx-UI/main/Chat%20SPY",
-    "https://raw.githubusercontent.com/Shipwuu/Yunicx-UI/main/Button%205"
+    "https://raw.githubusercontent.com/Shipwuu/Yunicx-UI/main/Button%205",
+    "https://raw.githubusercontent.com/Shipwuu/Yunicx-UI/main/Chat%20SPY"
 }
 
 local scripts = {}
