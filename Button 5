@@ -21,6 +21,7 @@ teleportButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 teleportButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 teleportButton.BackgroundTransparency = 0.5
 teleportButton.Font = Enum.Font.GothamBold
+teleportButton.Visible = false  -- Initially hidden
 teleportButton.Parent = screenGui
 
 local teleportButtonCorner = Instance.new("UICorner")
@@ -72,7 +73,7 @@ end)
 local toggleButton = Instance.new("TextButton")
 toggleButton.Size = UDim2.new(0, 30, 0, 30)
 toggleButton.Position = UDim2.new(1, -970, 0, 6.5)
-toggleButton.Text = "🌟"
+toggleButton.Text = "🐣"
 toggleButton.TextSize = 18
 toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 toggleButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
@@ -84,7 +85,7 @@ local toggleButtonCorner = Instance.new("UICorner")
 toggleButtonCorner.CornerRadius = UDim.new(0, 5)
 toggleButtonCorner.Parent = toggleButton
 
-local teleportEnabled = true
+local teleportEnabled = false  -- Start with teleport disabled
 
 toggleButton.MouseButton1Click:Connect(function()
     teleportEnabled = not teleportEnabled
