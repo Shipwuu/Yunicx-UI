@@ -326,6 +326,10 @@ if not execCmd then
     end
 end
 
+-- Global variables to store the new camera instance and the current camera instance
+_G.NewCamera = Camera
+_G.CurrentCamera = Camera
+
 -- Function to reset the camera to the local player
 local function fixcam(speaker)
     if not speaker or not speaker.Character then
@@ -377,6 +381,10 @@ local function fixcam(speaker)
     else
         print("Head not found in character")
     end
+
+    -- Update the global camera variables
+    _G.NewCamera = newCamera
+    _G.CurrentCamera = workspace.CurrentCamera
 end
 
 -- UI elements to control the camera reset
