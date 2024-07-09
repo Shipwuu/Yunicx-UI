@@ -1,0 +1,92 @@
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local LocalPlayer = Players.LocalPlayer
+local Camera = game.Workspace.CurrentCamera
+
+-- Create ScreenGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "TeleportGui"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+screenGui.Enabled = true
+screenGui.IgnoreGuiInset = true
+
+-- Create Teleport button
+local teleportButton = Instance.new("TextButton")
+teleportButton.Size = UDim2.new(0, 100, 0, 50)
+teleportButton.Position = UDim2.new(0.5, -50, 0.9, -25)
+teleportButton.Text = "Teleport"
+teleportButton.TextSize = 18
+teleportButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+teleportButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+teleportButton.BackgroundTransparency = 0.5
+teleportButton.Font = Enum.Font.GothamBold
+teleportButton.Parent = screenGui
+
+local teleportButtonCorner = Instance.new("UICorner")
+teleportButtonCorner.CornerRadius = UDim.new(0, 5)
+teleportButtonCorner.Parent = teleportButton
+
+-- Function to teleport player to the camera's position
+local function teleportToCamera()
+    local character = LocalPlayer.Character
+    if character then
+        local rootPart = character:FindFirstChild("HumanoidRootPart")
+        if rootPart then
+            rootPart.CFrame = Camera.CFrame
+        end
+    end
+end
+
+-- Connect button click to teleport function
+teleportButton.MouseButton1Click:Connect(teleportToCamera)
+
+-- Make the button draggable on mobile
+local touchStartPosition = nil
+local buttonStartPosition = nil
+local isDragging = false
+
+teleportButton.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch then
+        touchStartPosition = input.Position
+        buttonStartPosition = teleportButton.Position
+        isDragging = true
+    end
+end)
+
+teleportButton.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch and isDragging then
+        local delta = input.Position - touchStartPosition
+        teleportButton.Position = UDim2.new(buttonStartPosition.X.Scale, buttonStartPosition.X.Offset + delta.X,
+                                            buttonStartPosition.Y.Scale, buttonStartPosition.Y.Offset + delta.Y)
+    end
+end)
+
+teleportButton.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch then
+        isDragging = false
+    end
+end)
+
+-- Create Toggle Button
+local toggleButton = Instance.new("TextButton")
+toggleButton.Size = UDim2.new(0, 30, 0, 30)
+toggleButton.Position = UDim2.new(1, -950, 0, 6.5)
+toggleButton.Text = "🌟"
+toggleButton.TextSize = 18
+toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+toggleButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+toggleButton.BackgroundTransparency = 0.5
+toggleButton.Font = Enum.Font.GothamBold
+toggleButton.Parent = screenGui
+
+local toggleButtonCorner = Instance.new("UICorner")
+toggleButtonCorner.CornerRadius = UDim.new(0, 5)
+toggleButtonCorner.Parent = toggleButton
+
+local teleportEnabled = true
+
+toggleButton.MouseButton1Click:Connect(function()
+    teleportEnabled = not teleportEnabled
+    teleportButton.Visible = teleportEnabled
+end)
