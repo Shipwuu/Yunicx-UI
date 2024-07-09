@@ -32,8 +32,14 @@ local function teleportToCamera()
     local character = LocalPlayer.Character
     if character then
         local rootPart = character:FindFirstChild("HumanoidRootPart")
-        if rootPart and _G.NewCamera then
-            rootPart.CFrame = _G.NewCamera.CFrame
+        if rootPart then
+            if _G.NewCamera then
+                rootPart.CFrame = _G.NewCamera.CFrame
+            elseif _G.CurrentCamera then
+                rootPart.CFrame = _G.CurrentCamera.CFrame
+            else
+                rootPart.CFrame = workspace.CurrentCamera.CFrame
+            end
         end
     end
 end
