@@ -8,10 +8,11 @@ local urls = {
 }
 
 local scripts = {}
+local httpService = game:GetService("HttpService")
 
 for _, url in ipairs(urls) do
     local success, result = pcall(function()
-        return game:HttpGet(url)
+        return httpService:GetAsync(url, true)
     end)
     if success then
         table.insert(scripts, result)
