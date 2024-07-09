@@ -146,7 +146,7 @@ screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
 local toggleButton = Instance.new("TextButton")
 toggleButton.Size = UDim2.new(0, 30, 0, 30) -- Adjust button size
-toggleButton.Position = UDim2.new(1, -1050, 0, 7) -- Adjust position
+toggleButton.Position = UDim2.new(1, -1050, 0, 6.5) -- Adjust position
 toggleButton.Text = "🐣"
 toggleButton.TextSize = 18 -- Adjust text size
 toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)  -- White text color
