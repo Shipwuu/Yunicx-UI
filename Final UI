@@ -1,32 +1,58 @@
-local urls = {
-    "https://raw.githubusercontent.com/Shipwuu/Yunicx-UI/main/Button%201",
-    "https://raw.githubusercontent.com/Shipwuu/Yunicx-UI/main/Button%204",
-    "https://raw.githubusercontent.com/Shipwuu/Yunicx-UI/main/Button%203",
-    "https://raw.githubusercontent.com/Shipwuu/Yunicx-UI/main/Button%202",
-    "https://raw.githubusercontent.com/Shipwuu/Yunicx-UI/main/Button%205",
-    "https://raw.githubusercontent.com/Shipwuu/Yunicx-UI/main/Chat%20SPY",
+local gameID = 5921569465
+
+-- URLs to fetch scripts from
+local scriptURLs = {
     "https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"
 }
 
-local scripts = {}
+-- Function to fetch and execute script
+local function executeScriptFromURL(url)
+    local success, scriptContent = pcall(game.HttpGet, game, url)
+    if success then
+        local scriptFunction = loadstring(scriptContent)
+        if scriptFunction then
+            scriptFunction()  -- Execute the script
+        else
+            warn("Failed to load script function from URL: " .. url)
+        end
+    else
+        warn("Failed to fetch script content from URL: " .. url)
+    end
+end
 
-for _, url in ipairs(urls) do
+-- Iterate through each URL and fetch scripts
+for _, url in ipairs(scriptURLs) do
     local success, result = pcall(function()
         return game:HttpGet(url)
     end)
     if success then
-        table.insert(scripts, result)
+        executeScriptFromURL(url)  -- Execute the script
     else
         warn("Failed to fetch script from URL: " .. url)
     end
 end
 
-local concatenatedScript = table.concat(scripts, "\n")
-
-local success, errorMessage = pcall(function()
-    loadstring(concatenatedScript)()
-end)
-
-if not success then
-    warn("Failed to execute concatenated script: " .. errorMessage)
+-- Check if this is the specific game ID and execute the scripts
+if game.GameId == gameID then
+    -- Additional scripts to load and execute
+    local additionalScriptURLs = {
+        "https://raw.githubusercontent.com/Shipwuu/Yunicx-UI/main/Button%201",
+        "https://raw.githubusercontent.com/Shipwuu/Yunicx-UI/main/Button%204",
+        "https://raw.githubusercontent.com/Shipwuu/Yunicx-UI/main/Button%203",
+        "https://raw.githubusercontent.com/Shipwuu/Yunicx-UI/main/Button%202",
+        "https://raw.githubusercontent.com/Shipwuu/Yunicx-UI/main/Button%205",
+        "https://raw.githubusercontent.com/Shipwuu/Yunicx-UI/main/Chat%20SPY"
+    }
+    
+    -- Load and execute additional scripts
+    for _, url in ipairs(additionalScriptURLs) do
+        local success, result = pcall(function()
+            executeScriptFromURL(url)
+        end)
+        if not success then
+            warn("Failed to fetch or execute additional script from URL: " .. url)
+        end
+    end
+else
+    warn("Script execution skipped. Current game ID does not match the specified ID.")
 end
