@@ -70,3 +70,5 @@ rejoinButton.MouseButton1Click:Connect(function()
         Icon = HeadshotImage or ""  -- Set the headshot image as the icon, fallback to empty string if image not found
     })
 end)
+
+print("Button 2 🔵")
