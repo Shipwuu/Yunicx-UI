@@ -1,66 +1,108 @@
---This script reveals ALL hidden messages in the default chat
---chat "/spy" to toggle!
-enabled = true
---if true will check your messages too
-spyOnMyself = true
---if true will chat the logs publicly (fun, risky)
-public = false
---if true will use /me to stand out
-publicItalics = true
---customize private logs
-privateProperties = {
-	Color = Color3.fromRGB(0,255,255); 
-	Font = Enum.Font.SourceSansBold;
-	TextSize = 18;
+--[[ 
+    Universal Chat Spy with Player Count and Chat Tags
+    Type "/e spy" in chat to enable or disable the chat spy.
+    Type "/e po" in chat to display the current player count.
+    Works with the Roblox default chat system.
+--]]
+
+print("-- Chat Spy Initialized --")
+print("Type \"/e spy\" in chat to enable or disable the chat spy.")
+print("Type \"/e po\" in chat to display the current player count.")
+print("Script by dehoisted: https://github.com/dehoisted/Chat-Spy")
+
+-- Configuration
+local Config = {
+    enabled = true,
+    spyOnMyself = true,
+    public = false,
+    publicItalics = true
 }
---////////////////////////////////////////////////////////////////
-local StarterGui = game:GetService("StarterGui")
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-local saymsg = game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents"):WaitForChild("SayMessageRequest")
-local getmsg = game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents"):WaitForChild("OnMessageDoneFiltering")
-local instance = (_G.chatSpyInstance or 0) + 1
-_G.chatSpyInstance = instance
 
-local function onChatted(p,msg)
-	if _G.chatSpyInstance == instance then
-		if p==player and msg:lower():sub(1,4)=="/spy" then
-			enabled = not enabled
-			wait(0.3)
-			privateProperties.Text = "{SPY "..(enabled and "EN" or "DIS").."ABLED}"
-			StarterGui:SetCore("ChatMakeSystemMessage",privateProperties)
-		elseif enabled and (spyOnMyself==true or p~=player) then
-			msg = msg:gsub("[\n\r]",''):gsub("\t",' '):gsub("[ ]+",' ')
-			local hidden = true
-			local conn = getmsg.OnClientEvent:Connect(function(packet,channel)
-				if packet.SpeakerUserId==p.UserId and packet.Message==msg:sub(#msg-#packet.Message+1) and (channel=="All" or (channel=="Team" and public==false and Players[packet.FromSpeaker].Team==player.Team)) then
-					hidden = false
-				end
-			end)
-			wait(1)
-			conn:Disconnect()
-			if hidden and enabled then
-				if public then
-					saymsg:FireServer((publicItalics and "/me " or '').."{SPY} [".. p.Name .."]: "..msg,"All")
-				else
-					privateProperties.Text = "{SPY} [".. p.Name .."]: "..msg
-					StarterGui:SetCore("ChatMakeSystemMessage",privateProperties)
-				end
-			end
-		end
-	end
+-- Customizing Log Output
+local PrivateProperties = {
+    Color = Color3.fromRGB(0, 255, 255),
+    Font = Enum.Font.SourceSansBold,
+    TextSize = 18
+}
+
+-- Function to get current player count
+local function getPlayerCount()
+    local numPlayers = #game.Players:GetPlayers()
+    return numPlayers
 end
 
-for _,p in ipairs(Players:GetPlayers()) do
-	p.Chatted:Connect(function(msg) onChatted(p,msg) end)
+-- Command handler function
+local function handleCommand(command)
+    if command == "/e spy" then
+        Config.enabled = not Config.enabled
+        wait(0.3)
+        PrivateProperties.Text = "{SPY " .. (Config.enabled and "EN" or "DIS") .. "ABLED}"
+        game.StarterGui:SetCore("ChatMakeSystemMessage", PrivateProperties)
+    elseif command == "/e po" then
+        local playerCount = getPlayerCount()
+        local message = "Players in game: " .. playerCount
+        PrivateProperties.Text = message
+        game.StarterGui:SetCore("ChatMakeSystemMessage", PrivateProperties)
+    end
 end
-Players.PlayerAdded:Connect(function(p)
-	p.Chatted:Connect(function(msg) onChatted(p,msg) end)
+
+-- Function to determine the chat tag based on player criteria
+local function getChatTag(player)
+    if player == game.Players.LocalPlayer then
+        return "[👑 Me]", Color3.fromRGB(255, 255, 0)  -- Yellow color for "[👑 Me]"
+    elseif isFriend(player) then
+        return "[🌟 Friends]", Color3.fromRGB(173, 216, 230)  -- Light blue color for "[🌟 Friends]"
+    else
+        return "[Random]", Color3.fromRGB(128, 128, 128)  -- Gray color for "[Random]"
+    end
+end
+
+-- Function to detect if a player is a friend (Example: Replace with your own logic)
+local function isFriend(player)
+    -- Replace with your logic to determine if 'player' is a friend
+    return false  -- Example: return true if 'player' is a friend
+end
+
+-- Function to process chat messages
+local function onChatted(player, message)
+    if player == game.Players.LocalPlayer and message:sub(1, 1) == "/" then
+        local command = message:lower()
+        handleCommand(command)
+    elseif Config.enabled and (Config.spyOnMyself or player ~= game.Players.LocalPlayer) then
+        message = message:gsub("[\n\r\t]", ' '):gsub("[ ]+", ' ')
+        local hidden = true
+        local conn
+        conn = game.ReplicatedStorage.DefaultChatSystemChatEvents.OnMessageDoneFiltering.OnClientEvent:Connect(function(packet, channel)
+            if packet.SpeakerUserId == player.UserId and packet.Message == message:sub(#message - #packet.Message + 1) and (channel == "All" or (channel == "Team" and Config.public == false and game.Players[packet.FromSpeaker].Team == player.Team)) then
+                hidden = false
+            end
+        end)
+        wait(1)
+        conn:Disconnect()
+        if hidden and Config.enabled then
+            local tag, tagColor = getChatTag(player)
+            local formattedMessage = tag .. " [" .. player.Name .. "]: " .. message
+            local chatColor = BrickColor.new(tagColor).Color
+            game.StarterGui:SetCore("ChatMakeSystemMessage", {
+                Text = formattedMessage,
+                Color = chatColor,
+                Font = Enum.Font.SourceSansBold,
+                TextSize = 18
+            })
+        end
+    end
+end
+
+-- Listen to players already in game
+for _, player in ipairs(game.Players:GetPlayers()) do
+    player.Chatted:Connect(function(msg) onChatted(player, msg) end)
+end
+
+-- Listen to new players joining
+game.Players.PlayerAdded:Connect(function(player)
+    player.Chatted:Connect(function(msg) onChatted(player, msg) end)
 end)
-privateProperties.Text = "{SPY "..(enabled and "EN" or "DIS").."ABLED}"
-StarterGui:SetCore("ChatMakeSystemMessage",privateProperties)
-local chatFrame = player.PlayerGui.Chat.Frame
-chatFrame.ChatChannelParentFrame.Visible = true
-chatFrame.ChatBarParentFrame.Position = chatFrame.ChatChannelParentFrame.Position+UDim2.new(UDim.new(),chatFrame.ChatChannelParentFrame.Size.Y)
 
-print("ChatSPY ON 🔵")
+-- Initial message indicating the state of the spy
+PrivateProperties.Text = "{SPY " .. (Config.enabled and "EN" or "DIS") .. "ABLED}"
+game.StarterGui:SetCore("ChatMakeSystemMessage", PrivateProperties)
