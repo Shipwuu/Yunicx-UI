@@ -96,3 +96,5 @@ toggleButton.MouseButton1Click:Connect(function()
     teleportEnabled = not teleportEnabled
     teleportButton.Visible = teleportEnabled
 end)
+
+print("Button 5 🔵")
