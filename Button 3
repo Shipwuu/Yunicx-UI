@@ -203,3 +203,5 @@ Players.PlayerRemoving:Connect(function(plr)
         end
     end
 end)
+
+print("Button 3 🔵")
