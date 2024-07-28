@@ -8,7 +8,6 @@ local urls = {
     "https://raw.githubusercontent.com/Shipwuu/Yunicx-UI/main/Chat%20SPY"
 }
 
-local maxScriptsPerBatch = 10  -- Maximum number of scripts to execute per batch
 local maxRetries = 10  -- Maximum number of retries for each URL
 
 -- Function to load a script from a URL, with retries
@@ -24,47 +23,56 @@ local function loadScript(url)
         end)
 
         if not success then
-            warn("Failed to fetch script from URL: " .. url .. ", retrying...")
-            wait(1)  -- Wait before retrying
+            warn("Failed to fetch script from URL: " .. url .. ", retrying... (" .. numRetries .. "/" .. maxRetries .. ")")
+            wait(0.5)  -- Reduced wait time before retrying
         end
     until success or numRetries >= maxRetries
 
     return success, result
 end
 
--- Execute scripts in batches
-for i = 1, #urls, maxScriptsPerBatch do
+-- Function to fetch and execute scripts concurrently
+local function fetchAndExecuteScripts(urls)
+    local threads = {}
     local batchScripts = {}
 
-    -- Fetch scripts for the current batch
-    for j = i, math.min(i + maxScriptsPerBatch - 1, #urls) do
-        local url = urls[j]
-        local success, scriptContent = loadScript(url)
+    -- Create threads to fetch scripts concurrently
+    for _, url in ipairs(urls) do
+        table.insert(threads, coroutine.create(function()
+            local success, scriptContent = loadScript(url)
+            if success then
+                print("URL: " .. url .. " ✅")
+                table.insert(batchScripts, scriptContent)
+            else
+                print("URL: " .. url .. " ❌")
+            end
+        end))
+    end
 
-        if success then
-            print("URL: " .. url .. " ✅")
-            table.insert(batchScripts, scriptContent)
-        else
-            print("URL: " .. url .. " ❌")
+    -- Run all threads
+    for _, thread in ipairs(threads) do
+        coroutine.resume(thread)
+    end
+
+    -- Wait for all threads to complete
+    for _, thread in ipairs(threads) do
+        while coroutine.status(thread) ~= "dead" do
+            wait(0.1)
         end
     end
 
-    -- Concatenate scripts in the batch
+    -- Concatenate and execute all scripts
     local concatenatedScript = table.concat(batchScripts, "\n")
-
-    -- Execute the concatenated script if there are scripts to execute
     if concatenatedScript ~= "" then
         local success, errorMessage = pcall(function()
             loadstring(concatenatedScript)()
         end)
-
         if not success then
-            warn("Failed to execute batched script: " .. errorMessage)
+            warn("Failed to execute concatenated script: " .. errorMessage)
         end
     else
-        warn("No valid scripts in the batch to execute.")
+        warn("No valid scripts to execute.")
     end
-
-    -- Clear batchScripts table for the next batch
-    batchScripts = {}
 end
+
+fetchAndExecuteScripts(urls)
