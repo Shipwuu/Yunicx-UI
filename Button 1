@@ -47,3 +47,5 @@ local function getPlayerHeadshotImage(playerName)
     end
     return nil
 end
+
+print("Button 1 🔵")
