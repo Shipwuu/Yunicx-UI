@@ -8,8 +8,8 @@ local urls = {
     "https://raw.githubusercontent.com/Shipwuu/Yunicx-UI/main/Animation"
 }
 
+local maxScriptsPerBatch = 3  -- Maximum number of scripts to execute per batch
 local maxRetries = 3  -- Maximum number of retries for each URL
-local scripts = {}
 
 -- Function to load a script from a URL, with retries
 local function loadScript(url)
@@ -29,43 +29,42 @@ local function loadScript(url)
         end
     until success or numRetries >= maxRetries
 
-    if success then
-        return result  -- Return the fetched script content
+    return success, result
+end
+
+-- Execute scripts in batches
+for i = 1, #urls, maxScriptsPerBatch do
+    local batchScripts = {}
+
+    -- Fetch scripts for the current batch
+    for j = i, math.min(i + maxScriptsPerBatch - 1, #urls) do
+        local url = urls[j]
+        local success, scriptContent = loadScript(url)
+
+        if success then
+            print("URL: " .. url .. " ✅")
+            table.insert(batchScripts, scriptContent)
+        else
+            print("URL: " .. url .. " ❌")
+        end
+    end
+
+    -- Concatenate scripts in the batch
+    local concatenatedScript = table.concat(batchScripts, "\n")
+
+    -- Execute the concatenated script if there are scripts to execute
+    if concatenatedScript ~= "" then
+        local success, errorMessage = pcall(function()
+            loadstring(concatenatedScript)()
+        end)
+
+        if not success then
+            warn("Failed to execute batched script: " .. errorMessage)
+        end
     else
-        warn("Failed to fetch script from URL after " .. maxRetries .. " retries: " .. url)
-        return nil  -- Return nil if fetching failed
+        warn("No valid scripts in the batch to execute.")
     end
-end
 
--- Fetch and store each script
-for _, url in ipairs(urls) do
-    local scriptContent = loadScript(url)
-    if scriptContent then
-        print("URL: " .. url .. " ✅")
-        table.insert(scripts, { url = url, content = scriptContent, success = true })
-    else
-        print("URL: " .. url .. " ❌")
-        table.insert(scripts, { url = url, content = "Failed to fetch script.", success = false })
-    end
-end
-
--- Concatenate all fetched scripts
-local concatenatedScript = ""
-for _, scriptInfo in ipairs(scripts) do
-    if scriptInfo.success then
-        concatenatedScript = concatenatedScript .. scriptInfo.content .. "\n"
-    end
-end
-
--- Execute the concatenated script if there are scripts to execute
-if concatenatedScript ~= "" then
-    local success, errorMessage = pcall(function()
-        loadstring(concatenatedScript)()
-    end)
-
-    if not success then
-        warn("Failed to execute concatenated script: " .. errorMessage)
-    end
-else
-    warn("No valid scripts to execute.")
+    -- Clear batchScripts table for the next batch
+    batchScripts = {}
 end
