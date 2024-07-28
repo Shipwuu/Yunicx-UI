@@ -8,8 +8,8 @@ local urls = {
     "https://raw.githubusercontent.com/Shipwuu/Yunicx-UI/main/Animation"
 }
 
-local maxScriptsPerBatch = 3  -- Maximum number of scripts to execute per batch
-local maxRetries = 3  -- Maximum number of retries for each URL
+local maxScriptsPerBatch = 10  -- Maximum number of scripts to execute per batch
+local maxRetries = 10  -- Maximum number of retries for each URL
 
 -- Function to load a script from a URL, with retries
 local function loadScript(url)
