@@ -41,23 +41,31 @@ end
 for _, url in ipairs(urls) do
     local scriptContent = loadScript(url)
     if scriptContent then
-        table.insert(scripts, scriptContent)
+        print("URL: " .. url .. " ✅")
+        table.insert(scripts, { url = url, content = scriptContent, success = true })
+    else
+        print("URL: " .. url .. " ❌")
+        table.insert(scripts, { url = url, content = "Failed to fetch script.", success = false })
     end
 end
 
 -- Concatenate all fetched scripts
-local concatenatedScript = table.concat(scripts, "\n")
-
--- Execute the concatenated script
-local success, errorMessage = pcall(function()
-    loadstring(concatenatedScript)()
-end)
-
-if not success then
-    warn("Failed to execute concatenated script: " .. errorMessage)
+local concatenatedScript = ""
+for _, scriptInfo in ipairs(scripts) do
+    if scriptInfo.success then
+        concatenatedScript = concatenatedScript .. scriptInfo.content .. "\n"
+    end
 end
 
--- Print information from all fetched URLs
-for i, script in ipairs(scripts) do
-    print("Script from URL " .. urls[i] .. ":\n" .. script)
+-- Execute the concatenated script if there are scripts to execute
+if concatenatedScript ~= "" then
+    local success, errorMessage = pcall(function()
+        loadstring(concatenatedScript)()
+    end)
+
+    if not success then
+        warn("Failed to execute concatenated script: " .. errorMessage)
+    end
+else
+    warn("No valid scripts to execute.")
 end
