@@ -1,7 +1,24 @@
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local StarterGui = game:GetService("StarterGui")
+
+-- Function to fetch the player's headshot image
+local function getPlayerHeadshotImage(playerName)
+    local player = Players:FindFirstChild(playerName)
+    if player then
+        local userId = player.UserId
+        local ThumbType = Enum.ThumbnailType.HeadShot
+        local ThumbSize = Enum.ThumbnailSize.Size420x420
+
+        return Players:GetUserThumbnailAsync(userId, ThumbType, ThumbSize)
+    end
+    return nil
+end
+
 -- Create a ScreenGui for the button
 local gui = Instance.new("ScreenGui")
 gui.Name = "CustomButtonsGui"
-gui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
+gui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 gui.ResetOnSpawn = false
 
 -- Create the button for teleportation confirmation
@@ -30,7 +47,7 @@ rejoinButton.MouseButton1Click:Connect(function()
 
     function bindable.OnInvoke(response)
         local ts = game:GetService("TeleportService")
-        local p = game:GetService("Players").LocalPlayer
+        local p = Players.LocalPlayer
 
         ts:Teleport(game.PlaceId, p)
         if response == "Yes" then
@@ -53,21 +70,3 @@ rejoinButton.MouseButton1Click:Connect(function()
         Icon = HeadshotImage or ""  -- Set the headshot image as the icon, fallback to empty string if image not found
     })
 end)
-
-local StarterGui = game:GetService("StarterGui")
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
-
--- Function to fetch the player's headshot image
-local function getPlayerHeadshotImage(playerName)
-    local player = Players:FindFirstChild(playerName)
-    if player then
-        local userId = player.UserId
-        local ThumbType = Enum.ThumbnailType.HeadShot
-        local ThumbSize = Enum.ThumbnailSize.Size420x420
-
-        return Players:GetUserThumbnailAsync(userId, ThumbType, ThumbSize)
-    end
-    return nil
-end
