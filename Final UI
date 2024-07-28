@@ -8,25 +8,56 @@ local urls = {
     "https://raw.githubusercontent.com/Shipwuu/Yunicx-UI/main/Animation"
 }
 
+local maxRetries = 3  -- Maximum number of retries for each URL
 local scripts = {}
 
-for _, url in ipairs(urls) do
-    local success, result = pcall(function()
-        return game:HttpGet(url)
-    end)
+-- Function to load a script from a URL, with retries
+local function loadScript(url)
+    local numRetries = 0
+    local success = false
+    local result = nil
+
+    repeat
+        numRetries = numRetries + 1
+        success, result = pcall(function()
+            return game:HttpGet(url)
+        end)
+
+        if not success then
+            warn("Failed to fetch script from URL: " .. url .. ", retrying...")
+            wait(1)  -- Wait before retrying
+        end
+    until success or numRetries >= maxRetries
+
     if success then
-        table.insert(scripts, result)
+        return result  -- Return the fetched script content
     else
-        warn("Failed to fetch script from URL: " .. url)
+        warn("Failed to fetch script from URL after " .. maxRetries .. " retries: " .. url)
+        return nil  -- Return nil if fetching failed
     end
 end
 
+-- Fetch and store each script
+for _, url in ipairs(urls) do
+    local scriptContent = loadScript(url)
+    if scriptContent then
+        table.insert(scripts, scriptContent)
+    end
+end
+
+-- Concatenate all fetched scripts
 local concatenatedScript = table.concat(scripts, "\n")
 
+-- Execute the concatenated script
 local success, errorMessage = pcall(function()
     loadstring(concatenatedScript)()
 end)
 
 if not success then
     warn("Failed to execute concatenated script: " .. errorMessage)
+end
+
+-- Print information from all fetched URLs
+for i, script in ipairs(scripts) do
+    print("Script from URL " .. urls[i] .. ":\n" .. script)
 end
