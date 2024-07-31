@@ -278,24 +278,6 @@
         Zombie = "616163278"
 )
 
--- Function to play an animation for a specific category and character
-local function playAnimation(category, character)
-    local animationId = animations[category][character]
-    if type(animationId) == "table" then
-        -- Randomly select an animation ID from the list
-        animationId = animationId[math.random(1, #animationId)]
-    end
-    if animationId then
-        -- Play the animation
-        -- replace "Animation" with your script in the animation below
-        game.Players.LocalPlayer.Character.Animate.idle.value = animationId
-        wait (time 1)
-    end
-end
-
--- Example usage:
-playAnimation("idle", "Bold")
-
 
 
 
