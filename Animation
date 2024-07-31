@@ -1,3 +1,313 @@
+-- (
+-- Define the animation IDs for each animation category
+-- local animations = {
+    idle = {
+        Astronaut = {"891621366","891633237"},
+        Bold = {"16738333868","16738334710"},
+        Borock = {"3293641938","3293642554"},
+        Bubbly = {"910004836","910009958"},
+        Cartoony = {"742637544","742638445"},
+        Confident = {"1069977950","1069987858"},
+        Cowboy = {"1014390418","1014398616"},
+        DrollingZombie = {"3489171152","3489171152"},
+        Elder = {"10921101664","10921102574"},
+        Ghost = {"616006778","616008087"},
+        Knight = {"657595757","657568135"},
+        Levitation = {"616006778","616008087"},
+        Mage = {"707742142","707855907"},
+        MrToilet = {"4417977954","4417978624"},
+        Ninja = {"656117400","656118341"},
+        OldSchool = {"10921230744","10921232093"},
+        Patrol = {"1149612882","1150842221"},
+        Pirate = {"750781874","750782770"},
+        Popstar = {"1212900985","1150842221"},
+        Princess = {"941003647","941013098"},
+        R6 = {"12521158637","12521162526"},
+        R15Reanimated = {"4211217646","4211218409"},
+        Realistic = {"17172918855","17173014241"},
+        Robot = {"616088211","616089559"},
+        Sneaky = {"1132473842","1132477671"},
+        Adidas = {"18537376492","18537371272"},
+        Stylish = {"616136790","616138447"},
+        StylizedFemale = {"4708191566","4708192150"},
+        Superhero = {"616111295","616113536"},
+        Toy = {"782841498","782845736"},
+        Udzal = {"3303162274","3303162549"},
+        Vampire = {"1083445855","1083450166"},
+        Werewolf = {"1083195517","1083214717"},
+        Zombie = {"616158929","616160636"}
+    },
+
+    idleAlt = {
+        Astronaut = {"891633237","891633237"},
+        Bold = {"16738334710","16738334710"},
+        Borock = {"3293641938","3293642554"},
+        Bubbly = {"910009958","910009958"},
+        Cartoony = {"742638445","742638445"},
+        Confident = {"1069987858","1069987858"},
+        Cowboy = {"1014398616","1014398616"},
+        DrollingZombie = {"3489171152","3489171152"},
+        Elder = {"10921102574","10921102574"},
+        Ghost = {"616008087","616008087"},
+        Knight = {"657568135","657568135"},
+        Levitation = {"616008087","616008087"},
+        Mage = {"707855907","707855907"},
+        MrToilet = {"4417978624","4417978624"},
+        Ninja = {"656118341","656118341"},
+        OldSchool = {"10921232093","10921232093"},
+        Patrol = {"1150842221","1150842221"},
+        Pirate = {"750782770","750782770"},
+        Popstar = {"1150842221","1150842221"},
+        Princess = {"941013098","941013098"},
+        R6 = {"12521162526","12521162526"},
+        R15Reanimated = {"4211218409","4211218409"},
+        Realistic = {"17173014241","17173014241"},
+        Robot = {"616089559","616089559"},
+        Sneaky = {"1132477671","1132477671"},
+        Adidas = {"18537371272","18537371272"},
+        Stylish = {"616138447","616138447"},
+        StylizedFemale = {"4708192150","4708192150"},
+        Superhero = {"616113536","616113536"},
+        Toy = {"782845736","782845736"},
+        Udzal = {"3303162549","3303162549"},
+        Vampire = {"1083450166","1083450166"},
+        Werewolf = {"1083214717","1083214717"},
+        Zombie = {"616160636","616160636"}
+    },
+
+    walk = {
+        Astronaut = "891667138",
+        Bold = "16738340646",
+        Bubbly = "910034870",
+        Cartoony = "742640026",
+        Confident = "1070017263",
+        Cowboy = "1014421541",
+        DrollingZombie = "3489173414",
+        Elder = "10921111375",
+        Ghost = "616013216",
+        Knight = "10921127095",
+        Levitation = "616013216",
+        Mage = "707897309",
+        Ninja = "656121766",
+        OldSchool = "10921244891",
+        Patrol = "1151231493",
+        Pirate = "750785693",
+        Popstar = "1212980338",
+        Princess = "941028902",
+        R6 = "12518152696",
+        R15Reanim = "4211223236",
+        Robot = "616095330",
+        Sneaky = "1132510133",
+        Adidas = "18537392113",
+        Stylish = "616146177",
+        StylizedFemale = "4708193840",
+        Superhero = "6161222876",
+        Toy = "782843345",
+        Udzal = "3303162967",
+        Vampire = "1083473930",
+        Werewolf = "1083178339",
+        Zombie = "616165109"
+    },
+
+    run = {
+        Astronaut = "10921039308",
+        Bold = "16738337225",
+        Bubbly = "10921057244",
+        Cartoony = "10921076136",
+        Confident = "1070001516",
+        Cowboy = "1014401683",
+        DrollingZombie = "3489173414",
+        Elder = "10921104374",
+        Ghost = "616013216",
+        HeavyRun = "3236836670",
+        Knight = "10921121197",
+        Levitation = "616010382",
+        Mage = "10921148209",
+        MrToilet = "4417979645",
+        Ninja = "656118852",
+        OldSchool = "10921240218",
+        Patrol = "1150967949",
+        Pirate = "750783738",
+        Popstar = "1212980348",
+        Princess = "941015281",
+        R15Reanim = "4211220381",
+        R6 = "12518152696",
+        Robot = "10921250460",
+        Sneaky = "1132494274",
+        Adidas = "18537384940",
+        Stylish = "10921276116",
+        StylizedFemale = "4708192705",
+        Superhero = "10921291831",
+        Toy = "10921306285",
+        Vampire = "10921320299",
+        Werewolf = "10921336997",
+        Zombie = "616163682"
+    },
+
+    jump = {
+        Astronaut = "891627522",
+        Bold = "16738336650",
+        Bubbly = "910016857",
+        Cartoony = "742637942",
+        Confident = "1069984524",
+        Cowboy = "1014394726",
+        Elder = "10921107367",
+        Ghost = "616008936",
+        Knight = "910016857",
+        Levitation = "616008936",
+        Mage = "10921149743",
+        Ninja = "656117878",
+        OldSchool = "10921242013",
+        Patrol = "1148811837",
+        Pirate = "750782230",
+        Popstar = "1212954642",
+        Princess = "941008832",
+        Robot = "616090535",
+        R15Reanim = "4211219390",
+        R6 = "12520880485",
+        Sneaky = "1132489853",
+        Adidas = "18537380791",
+        Stylish = "616139451",
+        StylizedFemale = "4708188025",
+        Superhero = "616115533",
+        Toy = "10921308158",
+        Vampire = "1083455352",
+        Werewolf = "1083218792"
+    },
+
+    fall = {
+        Astronaut = "891617961",
+        Bold = "16738333171",
+        Bubbly = "910001910",
+        Cartoony = "742637151",
+        Confident = "1069973677",
+        Cowboy = "1014384571",
+        Elder = "10921105765",
+        Knight = "10921122579",
+        Levitation = "616005863",
+        Mage = "707829716",
+        Ninja = "656116965",
+        OldSchool = "10921229104",
+        Patrol = "1150785200",
+        Pirate = "750781187",
+        Popstar = "1150785591",
+        Princess = "940996662",
+        R6 = "12517845869",
+        R15Reanim = "4211217215",
+        Realistic = "17172898235",
+        Robot = "616087594",
+        Sneaky = "1132473172",
+        Adidas = "18537367799",
+        Stylish = "616137498",
+        StylizedFemale = "4708190740",
+        Superhero = "616110474",
+        Toy = "782839965",
+        Udzal = "3303160865",
+        Vampire = "1083442964",
+        Werewolf = "1083209696",
+        Zombie = "616157701"
+    },
+
+    swim = {
+        Astronaut = "10921014852",
+        Bold = "16738329592",
+        Bubbly = "10921033664",
+        Cartoony = "10921053060",
+        Confident = "1069998723",
+        Cowboy = "1014411795",
+        DrollingZombie = "3489173414",
+        Elder = "10921109368",
+        Ghost = "616011169",
+        Knight = "10921126459",
+        Levitation = "616011169",
+        Mage = "707893432",
+        MrToilet = "4417979478",
+        Ninja = "656120784",
+        OldSchool = "10921237342",
+        Patrol = "1151191120",
+        Pirate = "750784682",
+        Popstar = "1212980325",
+        Princess = "941022249",
+        R15Reanim = "4211222285",
+        R6 = "12518111447",
+        Robot = "10921248533",
+        Sneaky = "1132503412",
+        Adidas = "18537382479",
+        Stylish = "10921261419",
+        StylizedFemale = "4708193655",
+        Superhero = "10921276802",
+        Toy = "10921298312",
+        Udzal = "3303162464",
+        Vampire = "10921306529",
+        Werewolf = "10921324056",
+        Zombie = "616163278"
+    },
+
+    swimIdle = {
+        Astronaut = "10921014852",
+        Bold = "16738329592",
+        Bubbly = "10921033664",
+        Cartoony = "10921053060",
+        Confident = "1069998723",
+        Cowboy = "1014411795",
+        DrollingZombie = "3489173414",
+        Elder = "10921109368",
+        Ghost = "616011169",
+        Knight = "10921126459",
+        Levitation = "616011169",
+        Mage = "707893432",
+        MrToilet = "4417979478",
+        Ninja = "656120784",
+        OldSchool = "10921237342",
+        Patrol = "1151191120",
+        Pirate = "750784682",
+        Popstar = "1212980325",
+        Princess = "941022249",
+        R15Reanim = "4211222285",
+        R6 = "12518111447",
+        Robot = "10921248533",
+        Sneaky = "1132503412",
+        Adidas = "18537382479",
+        Stylish = "10921261419",
+        StylizedFemale = "4708193655",
+        Superhero = "10921276802",
+        Toy = "10921298312",
+        Udzal = "3303162464",
+        Vampire = "10921306529",
+        Werewolf = "10921324056",
+        Zombie = "616163278"
+)
+
+-- Function to play an animation for a specific category and character
+local function playAnimation(category, character)
+    local animationId = animations[category][character]
+    if type(animationId) == "table" then
+        -- Randomly select an animation ID from the list
+        animationId = animationId[math.random(1, #animationId)]
+    end
+    if animationId then
+        -- Play the animation
+        -- replace "Animation" with your script in the animation below
+        game.Players.LocalPlayer.Character.Animate.idle.value = animationId
+        wait (time 1)
+    end
+end
+
+-- Example usage:
+playAnimation("idle", "Bold")
+
+
+
+
+
+
+
+
+
+
+
+
+
 local animations = {
     idle = "rbxassetid://742637544",    -- Primary idle animation
     idleAlt = "rbxassetid://18537371272", -- Alternate idle animation
