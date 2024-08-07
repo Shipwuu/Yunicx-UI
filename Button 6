@@ -1,0 +1,136 @@
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local ContextActionService = game:GetService("ContextActionService")
+local LocalPlayer = Players.LocalPlayer
+
+-- Create ScreenGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "ShiftLockGui"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+screenGui.Enabled = true
+screenGui.IgnoreGuiInset = true
+
+-- Create Shift Lock button
+local shiftLockButton = Instance.new("ImageButton")
+shiftLockButton.Size = UDim2.new(0, 60, 0, 60)
+shiftLockButton.Position = UDim2.new(0.7, 0, 0.75, 0)
+shiftLockButton.Image = "rbxassetid://10709806995" -- Off state
+shiftLockButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+shiftLockButton.BackgroundTransparency = 0.7
+shiftLockButton.ImageTransparency = 0.5
+shiftLockButton.Visible = false
+shiftLockButton.Parent = screenGui
+
+local buttonCorner = Instance.new("UICorner")
+buttonCorner.CornerRadius = UDim.new(1, 0)
+buttonCorner.Parent = shiftLockButton
+
+-- Create Shift Lock cursor
+local shiftlockCursor = Instance.new("ImageLabel")
+shiftlockCursor.Size = UDim2.new(0.01, 0, 0.01, 0)
+shiftlockCursor.Position = UDim2.new(0.5, 0, 0.5, 0)
+shiftlockCursor.AnchorPoint = Vector2.new(0.5, 0.5)
+shiftlockCursor.Image = "rbxassetid://10734982395"
+shiftlockCursor.BackgroundTransparency = 1
+shiftlockCursor.ImageTransparency = 0.3
+shiftlockCursor.Visible = false
+shiftlockCursor.Parent = screenGui
+
+local Active
+local MaxLength = 900000
+local EnabledOffset = CFrame.new(1.7, 0, 0)
+local DisabledOffset = CFrame.new(-1.7, 0, 0)
+
+local function enableShiftLock()
+    LocalPlayer.Character.Humanoid.AutoRotate = false
+    shiftLockButton.Image = "rbxassetid://10709819149" -- On state
+    shiftlockCursor.Visible = true
+    LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(
+        LocalPlayer.Character.HumanoidRootPart.Position,
+        Vector3.new(
+            workspace.CurrentCamera.CFrame.LookVector.X * MaxLength,
+            LocalPlayer.Character.HumanoidRootPart.Position.Y,
+            workspace.CurrentCamera.CFrame.LookVector.Z * MaxLength
+        )
+    )
+    workspace.CurrentCamera.CFrame = workspace.CurrentCamera.CFrame * EnabledOffset
+    workspace.CurrentCamera.Focus = CFrame.fromMatrix(
+        workspace.CurrentCamera.Focus.Position,
+        workspace.CurrentCamera.CFrame.RightVector,
+        workspace.CurrentCamera.CFrame.UpVector
+    ) * EnabledOffset
+end
+
+local function disableShiftLock()
+    LocalPlayer.Character.Humanoid.AutoRotate = true
+    shiftLockButton.Image = "rbxassetid://10709806995" -- Off state
+    workspace.CurrentCamera.CFrame = workspace.CurrentCamera.CFrame * DisabledOffset
+    shiftlockCursor.Visible = false
+end
+
+shiftLockButton.MouseButton1Click:Connect(function()
+    if not Active then
+        Active = RunService.RenderStepped:Connect(enableShiftLock)
+    else
+        disableShiftLock()
+        if Active then
+            Active:Disconnect()
+            Active = nil
+        end
+    end
+end)
+
+-- Create Toggle Button
+local toggleButton = Instance.new("TextButton")
+toggleButton.Size = UDim2.new(0, 30, 0, 30)
+toggleButton.Position = UDim2.new(1, -930, 0, 6.5)
+toggleButton.Text = "🌟"
+toggleButton.TextSize = 18
+toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+toggleButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+toggleButton.BackgroundTransparency = 0.5
+toggleButton.Font = Enum.Font.GothamBold
+toggleButton.Parent = screenGui
+
+local toggleButtonCorner = Instance.new("UICorner")
+toggleButtonCorner.CornerRadius = UDim.new(0, 5)
+toggleButtonCorner.Parent = toggleButton
+
+local shiftLockEnabled = false  -- Start with shift lock disabled
+
+toggleButton.MouseButton1Click:Connect(function()
+    shiftLockEnabled = not shiftLockEnabled
+    shiftLockButton.Visible = shiftLockEnabled
+    shiftlockCursor.Visible = shiftLockEnabled and Active ~= nil
+end)
+
+-- Make the button draggable on mobile
+local touchStartPosition = nil
+local buttonStartPosition = nil
+local isDragging = false
+
+shiftLockButton.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch then
+        touchStartPosition = input.Position
+        buttonStartPosition = shiftLockButton.Position
+        isDragging = true
+    end
+end)
+
+shiftLockButton.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch and isDragging then
+        local delta = input.Position - touchStartPosition
+        shiftLockButton.Position = UDim2.new(buttonStartPosition.X.Scale, buttonStartPosition.X.Offset + delta.X,
+                                             buttonStartPosition.Y.Scale, buttonStartPosition.Y.Offset + delta.Y)
+    end
+end)
+
+shiftLockButton.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch then
+        isDragging = false
+    end
+end)
+
+print("Shift Lock Toggle Button Loaded 🔵")
