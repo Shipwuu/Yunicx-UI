@@ -1,7 +1,7 @@
 local animations = {
     idle = "rbxassetid://742637544",    -- Primary idle animation
     idleAlt = "rbxassetid://18537371272", -- Alternate idle animation
-    walk = "rbxassetid://6161222876",    -- Walk animation
+    walk = "rbxassetid://941028902",    -- Walk animation
     run = "rbxassetid://656118852",     -- Run animation
     jump = "rbxassetid://656117878",    -- Jump animation
     fall = "rbxassetid://656115606",    -- Fall animation
