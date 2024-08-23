@@ -5,8 +5,7 @@ local urls = {
     "https://raw.githubusercontent.com/Shipwuu/Yunicx-UI/main/Button%202",
     "https://raw.githubusercontent.com/Shipwuu/Yunicx-UI/main/Button%205",
     "https://raw.githubusercontent.com/Shipwuu/Yunicx-UI/main/Button%206",
-    "https://raw.githubusercontent.com/Shipwuu/Yunicx-UI/main/Animation",
-    "https://raw.githubusercontent.com/Shipwuu/Yunicx-UI/main/Chat%20SPY"
+    "https://raw.githubusercontent.com/Shipwuu/Yunicx-UI/main/Animation"
 }
 
 local maxRetries = 10  -- Maximum number of retries for each URL
