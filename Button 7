@@ -1,1 +1,49 @@
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local LocalPlayer = Players.LocalPlayer
 
+-- Create ScreenGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "ShiftLockGui"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+screenGui.Enabled = true
+screenGui.IgnoreGuiInset = true
+
+-- Create Shift Lock button
+local shiftLockButton = Instance.new("ImageButton")
+shiftLockButton.Size = UDim2.new(0, 60, 0, 60)
+shiftLockButton.Position = UDim2.new(0.8, 0, 0.75, 0) -- Shifted to the right to avoid overlap
+shiftLockButton.Image = "rbxassetid://10709806995" -- Off state
+shiftLockButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+shiftLockButton.BackgroundTransparency = 0.7
+shiftLockButton.ImageTransparency = 0.5
+shiftLockButton.Visible = true
+shiftLockButton.Parent = screenGui
+
+local buttonCorner = Instance.new("UICorner")
+buttonCorner.CornerRadius = UDim.new(1, 0)
+buttonCorner.Parent = shiftLockButton
+
+-- Create Toggle Button (🌟)
+local toggleButton = Instance.new("TextButton")
+toggleButton.Size = UDim2.new(0, 30, 0, 30)
+toggleButton.Position = UDim2.new(1, -930, 0, 6.5) -- Adjust the position to prevent overlap
+toggleButton.Text = "🌟"
+toggleButton.TextSize = 18
+toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+toggleButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+toggleButton.BackgroundTransparency = 0.5
+toggleButton.Font = Enum.Font.GothamBold
+toggleButton.Parent = screenGui
+
+local toggleButtonCorner = Instance.new("UICorner")
+toggleButtonCorner.CornerRadius = UDim.new(0, 5)
+toggleButtonCorner.Parent = toggleButton
+
+-- Button functionality to run the provided loadstring script
+shiftLockButton.MouseButton1Click:Connect(function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/Shipwuu/Yunicx-UI/main/Emote%20Popup"))()
+end)
+
+print("Emote Button Loaded 🔵")
