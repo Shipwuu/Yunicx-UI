@@ -1,0 +1,375 @@
+local HttpService = game:GetService("HttpService")
+local CoreGui = game:GetService("CoreGui")
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local StarterGui = game:GetService("StarterGui")
+
+local Cursor = ""
+local FavoritedEmotes = {}
+local Emotes = {}
+local EmoteButtons = {}  -- Store emote buttons for toggling visibility
+local SettingToggleVisible = true  -- Track setting toggle visibility
+
+-- Create a folder to store visibility states for emote buttons
+local function SaveVisibilitySettings()
+    local VisibilityFolder = {}
+    for _, emoteData in ipairs(EmoteButtons) do
+        VisibilityFolder[emoteData.Name] = emoteData.Button.Visible
+    end
+    writefile("EmoteVisibilitySettings.txt", HttpService:JSONEncode(VisibilityFolder))
+end
+
+local function LoadVisibilitySettings()
+    if isfile("EmoteVisibilitySettings.txt") then
+        local savedSettings = HttpService:JSONDecode(readfile("EmoteVisibilitySettings.txt"))
+        return savedSettings
+    end
+    return {}
+end
+
+-- Create a folder to store button positions
+local function SavePositionSettings()
+    local PositionFolder = {}
+    for _, emoteData in ipairs(EmoteButtons) do
+        PositionFolder[emoteData.Name] = {
+            XScale = emoteData.Button.Position.X.Scale,
+            XOffset = emoteData.Button.Position.X.Offset,
+            YScale = emoteData.Button.Position.Y.Scale,
+            YOffset = emoteData.Button.Position.Y.Offset
+        }
+    end
+    writefile("EmotePositionSettings.txt", HttpService:JSONEncode(PositionFolder))
+end
+
+local function LoadPositionSettings()
+    if isfile("EmotePositionSettings.txt") then
+        local savedPositions = HttpService:JSONDecode(readfile("EmotePositionSettings.txt"))
+        return savedPositions
+    end
+    return {}
+end
+
+local SavedVisibilitySettings = LoadVisibilitySettings()
+local SavedPositionSettings = LoadPositionSettings()
+
+-- Destroy the old GUI if it already exists
+if CoreGui:FindFirstChild("FavoriteEmotes") then
+    CoreGui:FindFirstChild("FavoriteEmotes"):Destroy()
+end
+
+-- Load FavoritedEmotes file
+if isfile("FavoritedEmotes.txt") then
+    pcall(function()
+        FavoritedEmotes = HttpService:JSONDecode(readfile("FavoritedEmotes.txt"))
+    end)
+else
+    writefile("FavoritedEmotes.txt", HttpService:JSONEncode(FavoritedEmotes))
+end
+
+-- Create a new ScreenGui to hold the draggable buttons
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "FavoriteEmotes"
+ScreenGui.Parent = CoreGui
+
+-- Create Loading Screen
+local function CreateLoadingScreen()
+    local LoadingFrame = Instance.new("Frame")
+    LoadingFrame.Size = UDim2.new(0, 250, 0, 40)
+    LoadingFrame.Position = UDim2.new(0.5, -125, 0, 10) -- Center top position
+    LoadingFrame.AnchorPoint = Vector2.new(0.5, 0)
+    LoadingFrame.BackgroundColor3 = Color3.new(0, 0, 0)
+    LoadingFrame.BackgroundTransparency = 0.5
+    LoadingFrame.Parent = ScreenGui
+
+    -- Add UICorner for the frame
+    local FrameCorner = Instance.new("UICorner")
+    FrameCorner.CornerRadius = UDim.new(0, 12)
+    FrameCorner.Parent = LoadingFrame
+
+    -- Add white outline (UIStroke)
+    local Outline = Instance.new("UIStroke")
+    Outline.Thickness = 2
+    Outline.Color = Color3.new(1, 1, 1)
+    Outline.Transparency = 0.5
+    Outline.Parent = LoadingFrame
+
+    -- Create a label for "Emote Loading..."
+    local LoadingText = Instance.new("TextLabel")
+    LoadingText.Size = UDim2.new(1, 0, 1, 0)
+    LoadingText.Text = "Emote Loading..."
+    LoadingText.TextColor3 = Color3.new(1, 1, 1)
+    LoadingText.TextScaled = true
+    LoadingText.BackgroundTransparency = 1
+    LoadingText.Parent = LoadingFrame
+
+    -- Animate the loading text
+    local function AnimateLoadingText()
+        while true do
+            for i = 1, 3 do
+                LoadingText.Text = "Emote Loading" .. string.rep(".", i)
+                task.wait(0.5)
+            end
+        end
+    end
+    task.spawn(AnimateLoadingText)
+
+    return LoadingFrame, LoadingText
+end
+
+-- Function to play the selected emote
+local function PlayEmote(name, id)
+    local LocalPlayer = Players.LocalPlayer
+    if not LocalPlayer or not LocalPlayer.Character then
+        print("LocalPlayer or Character is nil, cannot play emote")
+        return
+    end
+    local Humanoid = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+    local Description = Humanoid and Humanoid:FindFirstChildOfClass("HumanoidDescription")
+    if not Description then return end
+
+    if LocalPlayer.Character.Humanoid.RigType ~= Enum.HumanoidRigType.R6 then
+        local succ, err = pcall(function()
+            Humanoid:PlayEmoteAndGetAnimTrackById(id)
+        end)
+        if not succ then
+            Description:AddEmote(name, id)
+            Humanoid:PlayEmoteAndGetAnimTrackById(id)
+        end
+    else
+        StarterGui:SetCore("SendNotification", {
+            Title = "R6 Emote not supported",
+            Text = "You need to be R15 to use this emote.",
+            Duration = 3
+        })
+    end
+end
+
+-- Create draggable button for each favorite emote
+local function CreateFavoriteEmoteButton(emote)
+    local EmoteButton = Instance.new("ImageButton")
+    EmoteButton.Image = emote.icon
+    EmoteButton.Size = UDim2.new(0, 45, 0, 45)
+    EmoteButton.BackgroundColor3 = Color3.new(0, 0, 0)
+    EmoteButton.BackgroundTransparency = 0.8
+    EmoteButton.Draggable = true
+    EmoteButton.Parent = ScreenGui
+
+    -- Apply saved visibility settings
+    if SavedVisibilitySettings[emote.name] ~= nil then
+        EmoteButton.Visible = SavedVisibilitySettings[emote.name]
+    end
+
+    -- Apply saved position settings
+    if SavedPositionSettings[emote.name] ~= nil then
+        local positionData = SavedPositionSettings[emote.name]
+        EmoteButton.Position = UDim2.new(positionData.XScale, positionData.XOffset, positionData.YScale, positionData.YOffset)
+    else
+        EmoteButton.Position = UDim2.new(0.5, math.random(-100, 100), 0.4, math.random(-100, 100)) -- Random default position
+    end
+
+    -- Add UICorner to make it rounded
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(0, 8)
+    UICorner.Parent = EmoteButton
+
+    -- Add white outline (UIStroke)
+    local Outline = Instance.new("UIStroke")
+    Outline.Thickness = 2
+    Outline.Color = Color3.new(1, 1, 1)
+    Outline.Parent = EmoteButton
+
+    -- Play emote when the button is clicked
+    EmoteButton.MouseButton1Click:Connect(function()
+        PlayEmote(emote.name, emote.id)
+        print("Emote button clicked: Playing emote " .. emote.name)
+    end)
+
+    -- Detect when the button is moved and save the new position
+    EmoteButton.Changed:Connect(function(property)
+        if property == "Position" then
+            SavePositionSettings()
+        end
+    end)
+
+    -- Store button reference for toggling visibility later
+    table.insert(EmoteButtons, {Button = EmoteButton, Name = emote.name})
+end
+
+-- Create settings frame for toggling emote visibility (scrollable)
+local function CreateSettingsFrame()
+    local SettingsFrame = Instance.new("ScrollingFrame")
+    SettingsFrame.Size = UDim2.new(0, 150, 0, 180)
+    SettingsFrame.Position = UDim2.new(0, 10, 0.5, -100) -- Left side, vertically centered
+    SettingsFrame.BackgroundColor3 = Color3.new(0, 0, 0)
+    SettingsFrame.BackgroundTransparency = 0.8 -- Transparent to 0.8
+    SettingsFrame.ScrollBarThickness = 5
+    SettingsFrame.CanvasSize = UDim2.new(0, 0, 0, #EmoteButtons * 35) -- Prevent overscrolling
+    SettingsFrame.Parent = ScreenGui
+    SettingsFrame.Visible = false -- Initially hidden
+
+    -- Add UICorner for consistent theme
+    local FrameCorner = Instance.new("UICorner")
+    FrameCorner.CornerRadius = UDim.new(0, 12)
+    FrameCorner.Parent = SettingsFrame
+
+    -- Add white outline (UIStroke)
+    local Outline = Instance.new("UIStroke")
+    Outline.Thickness = 2
+    Outline.Color = Color3.new(1, 1, 1)
+    Outline.Transparency = 0.5
+    Outline.Parent = SettingsFrame
+
+    return SettingsFrame
+end
+
+-- Create toggle button to show/hide the settings frame
+local function CreateSettingsToggleButton()
+    local ToggleButton = Instance.new("TextButton")
+    ToggleButton.Size = UDim2.new(0, 45, 0, 45)
+    ToggleButton.Position = UDim2.new(0, 10, 0.5, -25) -- Left side
+    ToggleButton.Text = "⚙️"
+    ToggleButton.TextScaled = true
+    ToggleButton.BackgroundColor3 = Color3.new(0, 0, 0)
+    ToggleButton.BackgroundTransparency = 0.8
+    ToggleButton.Draggable = true
+    ToggleButton.Parent = ScreenGui
+
+    -- Add UICorner and UIStroke for consistent theme
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(0, 8)
+    UICorner.Parent = ToggleButton
+
+    local UIStroke = Instance.new("UIStroke")
+    UIStroke.Thickness = 2
+    UIStroke.Color = Color3.new(1, 1, 1)
+    UIStroke.Parent = ToggleButton
+
+    return ToggleButton
+end
+
+-- Create a toggle button for each emote in the settings frame
+local function CreateEmoteToggles(settingsFrame)
+    for index, emoteData in ipairs(EmoteButtons) do
+        local Toggle = Instance.new("TextButton")
+        Toggle.Size = UDim2.new(1, -10, 0, 30)
+        Toggle.Position = UDim2.new(0, 5, 0, (index - 1) * 35)
+        Toggle.Text = emoteData.Name
+        Toggle.TextColor3 = Color3.new(0, 0, 0)  -- Black text for the toggle
+        Toggle.BackgroundColor3 = Color3.new(0, 0, 0)
+        Toggle.BackgroundTransparency = 0.5
+        Toggle.Parent = settingsFrame
+
+        -- Add UICorner and UIStroke for consistent theme
+        local UICorner = Instance.new("UICorner")
+        UICorner.CornerRadius = UDim.new(0, 8)
+        UICorner.Parent = Toggle
+
+        local UIStroke = Instance.new("UIStroke")
+        UIStroke.Thickness = 2
+        UIStroke.Color = Color3.new(1, 1, 1) -- Default stroke color for hidden emote buttons
+        UIStroke.Parent = Toggle
+
+        -- Set the stroke color based on the visibility of the emote button
+        local function UpdateStrokeColor()
+            if emoteData.Button.Visible then
+                UIStroke.Color = Color3.new(0, 1, 0)  -- Green for visible emote buttons
+            else
+                UIStroke.Color = Color3.new(1, 1, 1)  -- White for hidden emote buttons
+            end
+        end
+        UpdateStrokeColor()
+
+        -- Toggle visibility of the emote button when clicked
+        Toggle.MouseButton1Click:Connect(function()
+            emoteData.Button.Visible = not emoteData.Button.Visible
+            UpdateStrokeColor()  -- Update stroke color based on visibility
+            SaveVisibilitySettings()  -- Save updated visibility settings
+        end)
+    end
+end
+
+-- Function to add an emote to the list
+local function AddEmote(name, id, icon)
+    local emote = {
+        name = name,
+        id = id,
+        icon = icon or "rbxthumb://type=Asset&id=" .. id .. "&w=150&h=150"
+    }
+    table.insert(Emotes, emote)
+end
+
+-- Function to fetch emotes from Roblox Catalog
+local function FetchEmotes()
+    while true do
+        local function Request()
+            local success, Response = pcall(function()
+                return game:HttpGetAsync("https://catalog.roblox.com/v1/search/items/details?Category=12&Subcategory=39&SortType=1&SortAggregation=&limit=30&IncludeNotForSale=true&cursor=" .. Cursor)
+            end)
+            if not success then
+                task.wait(10)
+                return Request()
+            end
+            return Response
+        end
+        
+        local Response = Request()
+        local Body = HttpService:JSONDecode(Response)
+        
+        for i, v in pairs(Body.data) do
+            if v and v.name and v.id then
+                AddEmote(v.name, v.id, v.icon)
+            end
+        end
+        
+        if Body.nextPageCursor ~= nil then
+            Cursor = Body.nextPageCursor
+        else
+            break
+        end
+    end
+end
+
+-- Create buttons for favorite emotes
+local function CreateFavoriteEmoteButtons()
+    for _, favorite in ipairs(FavoritedEmotes) do
+        for _, emote in pairs(Emotes) do
+            if emote.id == favorite then
+                CreateFavoriteEmoteButton(emote)
+                print("Created shortcut for favorite emote: " .. emote.name)
+            end
+        end
+    end
+end
+
+-- Main logic
+local LoadingFrame, LoadingText = CreateLoadingScreen()
+FetchEmotes()
+CreateFavoriteEmoteButtons()
+
+-- Detect when emotes are loaded and update loading screen text
+LoadingText.Text = "Emote Loaded"
+task.delay(0, function()
+    local fadeOut = TweenService:Create(LoadingFrame, TweenInfo.new(1), {BackgroundTransparency = 1})
+    fadeOut:Play()
+    fadeOut.Completed:Connect(function()
+        LoadingFrame:Destroy()
+    end)
+end)
+
+-- Create settings frame and add toggles for emote visibility
+local SettingsFrame = CreateSettingsFrame()
+CreateEmoteToggles(SettingsFrame)
+
+-- Create a draggable toggle button to show/hide the settings frame
+local SettingsToggleButton = CreateSettingsToggleButton()
+SettingsToggleButton.MouseButton1Click:Connect(function()
+    SettingToggleVisible = not SettingToggleVisible
+    SettingsFrame.Visible = SettingToggleVisible
+end)
+
+-- Notify that favorite emotes are ready
+StarterGui:SetCore("SendNotification", {
+    Title = "Favorite Emotes Ready",
+    Text = "Shortcut buttons for your favorite emotes have been created.",
+    Duration = 3
+})
